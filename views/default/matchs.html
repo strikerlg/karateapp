@@ -1,0 +1,20 @@
+{{extend 'layout.html'}}
+<h1>{{=T('matchs')}}</h1>
+<table class="table">
+    <tr>
+        <td>ID</td>
+        <td>COMPETIDORES</td>
+        <td>&nbsp;</td>
+        
+    </tr>
+{{for record in matchs:}}
+    <tr>
+        <td>{{=record.id}}</td>
+        <td>{{=record.competitor_blue_id}} vs {{=record.competitor_red_id}} </td>
+        <td><a type="button" target="_blank"  href="{{=URL('dashboard','index')}}" class="btn btn-primary btn-xs">Tablero de Control</a>
+            <a type="button" target="_blank"  href="{{=URL('dashboard','projection')}}" class="btn btn-primary btn-xs">Monitor</a>
+        </td>
+        
+    </tr>
+{{pass}}
+</table>

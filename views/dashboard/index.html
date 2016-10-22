@@ -1,0 +1,427 @@
+{{extend 'layout.html'}}
+<style>
+
+
+
+#blue_header {
+color:blue;
+text-align:center;
+        
+}
+
+#red_header {
+
+color:red;
+text-align:center;
+        
+}
+
+
+
+
+#blue_score {
+font-size:300px;
+color:blue;
+text-align:center;
+padding-top:0px;
+
+        
+}
+#competitor_blue {
+font-size:100px;
+color:blue;
+text-align:center;
+
+
+        
+}
+#red_score {
+    font-size:300px;
+color:red;
+text-align:center; 
+padding-top:0px;  
+}
+    
+#competitor_red {
+    font-size:100px;
+color:red;
+text-align:center;   
+}
+    
+#cronometer {
+    font-size:100px;
+color:yellow;
+text-align:center;   
+}
+#protection {
+    font-size:100px;
+    color:white;
+    text-align:center;   
+    //visibility:hidden;
+    //display:none;
+}
+body {
+    
+    padding-top:0px;
+    padding-bottom;0px;
+    }
+</style>
+<div class="row">
+  <div class="col-md-4" style="text-align:center"><div id="competitor_blue" >DIAZ</div></div>
+  <div class="col-md-4" style="text-align:center">  
+      <div id="cronometer" > <span id="minutos">60</span> : <span id="segundos">00</span> </div> 
+      <div id="protection" >10</div> 
+  </div>
+  
+  <div class="col-md-4" style="text-align:center"><div id="competitor_red" >PEREZ</div></div>
+</div>
+<div class="row">
+  <div class="col-md-4" style="text-align:center"><span id="blue_score" >0</span></div>
+  <div class="col-md-4" style="text-align:center">
+      <div class="btn-group" data-toggle="buttons">
+       <table class="table" valign="middle">
+        <tr>
+            <th>&nbsp;</th>
+            <th><span id="blue_header">CAT 1 </span></th>
+            <th><span id="blue_header">CAT 2 </span></th>
+            <th>&nbsp;</th>
+            <th><span id="red_header">CAT 1 </span></th>
+            <th><span id="red_header">CAT 2 </span></th>
+        </tr>
+        <tr>
+            <td>C</td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+            <td>&nbsp;</td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+        </tr>   
+        
+        <tr>
+            <td>K</td>
+            <td><input type="checkbox" autocomplete="off"></td>
+            <td><input type="checkbox" autocomplete="off"></td>
+            <td>&nbsp;</td>
+            <td><input type="checkbox" autocomplete="off"></td>
+            <td><<input type="checkbox" autocomplete="off"></td>
+        </tr>   
+        <tr>
+            <td>HC</td>
+            <td><input type="checkbox" autocomplete="off"></td>
+            <td><input type="checkbox" autocomplete="off"></td>
+             <td>&nbsp;</td>
+            <td><input type="checkbox" autocomplete="off"></td>
+            <td><input type="checkbox" autocomplete="off"></td>
+        </tr>       
+        <tr>
+            <td>H</td>
+            <td><input type="checkbox" autocomplete="off"></td>
+            <td><input type="checkbox" autocomplete="off"></td>
+             <td>&nbsp;</td>
+            <td><input type="checkbox" autocomplete="off"></td>
+            <td><input type="checkbox" autocomplete="off"></td>
+        </tr>                          
+       </table>
+    </div>
+    
+  </div>
+  <div class="col-md-4" style="text-align:center"><span id="red_score">0</span></div>
+</div>
+
+
+<div class="row">
+  <div class="col-md-4" style="text-align:center"> 
+
+    
+   </div>
+  <div class="col-md-4" style="text-align:center"> </div>
+  <div class="col-md-4" style="text-align:center">  </div>
+</div>
+
+
+<div class="row">
+  <div class="col-md-6" style="text-align:center">
+      <div class="btn-group btn-group-lg" role="group" aria-label="...">
+          <a id="btn_blue1" type="button" class="btn btn-primary ">+1</a>          
+          <a id="btn_blue2" type="button" class="btn btn-primary ">+2</a>
+          <a id="btn_blue3" type="button" class="btn btn-primary ">+3</a>
+          <a id="btn_bluec1" type="button" class="btn btn-primary ">C1</a>
+          <a id="btn_bluec2" type="button" class="btn btn-primary ">C2</a>
+          <a id="btn_blueprotection" type="button" class="btn btn-primary ">10''</a> 
+      </div>
+      
+  </div>
+  <div class="col-md-2" style="text-align:center"></div>
+  <div class="col-md-6" style="text-align:center">
+      <div class="btn-group btn-group-lg" role="group" aria-label="...">
+
+          <a id="btn_red1" type="button" class="btn btn-danger ">+1</a>
+          <a id="btn_red2" type="button" class="btn btn-danger ">+2</a>
+          <a id="btn_red3" type="button" class="btn btn-danger ">+3</a> 
+          <a id="btn_redc1" type="button" class="btn btn-danger ">C1</a>
+          <a id="btn_redc2" type="button" class="btn btn-danger ">C2</a>   
+          <a id="btn_redprotection" type="button" class="btn btn-danger ">10''</a>        
+      </div>
+      
+  </div>
+</div>
+
+<script>$( document ).ready(function() {
+    nav= $('nav').hide();
+    var foot = $('footer');
+    foot= $('footer').hide();
+    body= $('body');
+    body.css('background','black');
+    social=$('#socialdrawer');
+    social.hide();
+    });
+</script>
+
+
+<script language="JavaScript">
+
+var fight = {
+    fight_id : 1,
+    blue_athlete_id:1,
+    blue_athlete_name: 'Diaz',
+    blue_score:3,
+    blue_c1:1,
+    blue_c2:0,
+    red_athlete_id: 1,
+    red_athlete_name: 'Perez',
+    red_score:3,
+    red_c1:1,
+    red_c2:0,                
+    cronometer_secs:2,
+    mins:0,active:1,
+    protection_color: '',  
+    protection_secs:10,
+    finished:0,
+    
+    }
+
+    
+
+
+
+
+
+start_crono=false;
+start_protection=false;
+
+
+
+shortcut.add("1",function() {
+    add_score('blue',1);
+});
+
+shortcut.add("2",function() {
+    add_score('blue',2);
+});
+
+shortcut.add("3",function() {
+   add_score('blue',3);
+});
+
+shortcut.add("X",function() {
+   add_score('blue',-1);
+});
+
+
+
+shortcut.add("8",function() {
+    add_score('red',1);
+});
+
+shortcut.add("9",function() {
+    add_score('red',2);
+});
+
+shortcut.add("0",function() {
+   add_score('red',3);
+});
+
+shortcut.add("M",function() {
+   add_score('red',-1);
+});
+
+
+shortcut.add("space",function() {
+   if (start_crono) {
+       start_crono = false;
+       //alert("Detener Crono");
+    }else{
+        start_crono = true;
+        //alert("Iniciar Crono");
+    }
+});
+
+
+
+
+
+
+$( "#btn_blue1" ).click(function() {
+   add_score('blue',1);
+});
+
+$( "#btn_blue2" ).click(function() {
+   add_score('blue',2);
+});
+
+$( "#btn_blue3" ).click(function() {
+   add_score('blue',3);
+});
+
+$( "#btn_bluec1" ).click(function() {
+   add_score('blue',1);
+});
+
+$( "#btn_bluec2" ).click(function() {
+   add_score('blue',1);
+});
+
+$( "#btn_blueprotection" ).click(function() {
+
+   var m1; 
+   fight.protection_color = 'blue';
+   $('#cronometer').toggle();
+   $('#protection').toggle();
+   if (start_protection_blue) {
+       start_protection_blue = false;
+       secs_prot = 10;
+    }else{ start_protection_blue=true;
+     $('#protection').css('color','blue');   
+
+    
+    }
+});
+
+
+
+$( "#btn_red1" ).click(function() {
+   add_score('red',1);
+});
+
+$( "#btn_red2" ).click(function() {
+   add_score('red',2);
+});
+
+$( "#btn_red3" ).click(function() {
+   add_score('red',3);
+});
+
+$( "#btn_redc1" ).click(function() {
+   add_score('red',1);
+});
+
+$( "#btn_redc2" ).click(function() {
+   add_score('red',1);
+});
+
+$( "#btn_redprotection" ).click(function() {
+   var m1; 
+   fight.protection_color = 'red';
+   $('#cronometer').toggle();
+   $('#protection').toggle();
+   if (start_protection_red) {
+       start_protection_red = false;
+       secs_prot = 10;
+    }else{ start_protection_red=true;
+     $('#protection').css('color','red');   
+
+    
+    }
+   
+  
+   
+});
+$('#protection').hide();
+
+</script>
+
+<script type="text/javascript">
+//<![CDATA[
+// 1000 = 1 segundo
+var mins = 3;
+var segs =59;
+var s;
+ document.getElementById("minutos").innerHTML='0'+mins;
+function cronometro(){
+    if (start_crono==true) {
+        if ( segs>=0 ) {    
+            fmt = '';
+            fmt_min='';
+            if (segs < 10) { fmt='0' }
+            if (mins < 10) { fmt_min='0' }
+            document.getElementById("segundos").innerHTML=fmt+segs;
+            if(segs == 0){
+                //location.reload();
+                var ds = clearInterval(s);
+                mins--;
+                document.getElementById("minutos").innerHTML=fmt_min+mins;
+                segs =  60; 
+            }
+        }
+        segs--;
+    }
+}
+ 
+var m = setInterval('cronometro()', 1000);
+
+var secs_prot = 10;
+var start_protection_red=false;
+var start_protection_blue=false;
+var color='';
+function protection_blue(){
+    color='blue';
+    if (start_protection_blue==true) {
+        if ( secs_prot>=0 ) {    
+            fmt = '';
+            fmt_min='';
+            if (secs_prot < 10) { fmt='0' }
+            if (mins < 10) { fmt_min='0' }
+            console.log('protenction '+secs_prot);
+            document.getElementById("protection").innerHTML=fmt+secs_prot;
+            //var m = setInterval('protection('+color+')', 1000);
+
+            if(secs_prot == 0){
+                //location.reload();
+                alert('perdio '+color);
+            }
+        }
+        secs_prot--;
+    }   
+    
+
+}
+
+function protection_red(){
+    color='red';
+    if (start_protection_red==true) {
+        if ( secs_prot>=0 ) {    
+            fmt = '';
+            fmt_min='';
+            if (secs_prot < 10) { fmt='0' }
+            if (mins < 10) { fmt_min='0' }
+            console.log('protenction '+secs_prot);
+            document.getElementById("protection").innerHTML=fmt+secs_prot;
+            //var m = setInterval('protection('+color+')', 1000);
+
+            if(secs_prot == 0){
+                //location.reload();
+                alert('perdio '+color);
+            }
+        }
+        secs_prot--;
+    }   
+    
+
+}
+ 
+var m1 = setInterval('protection_red()', 1000);  
+
+var m2 = setInterval('protection_blue()', 1000);   
+ 
+//]]>
+</script>

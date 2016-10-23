@@ -166,6 +166,24 @@ body {
   </div>
 </div>
 
+<div class="row">
+  <div class="col-md-6" style="text-align:center">
+      <div class="btn-group btn-group-lg" role="group" aria-label="...">
+          <a id="btn_blue_minus" type="button" class="btn btn-primary ">-1</a>          
+
+      </div>
+      
+  </div>
+  <div class="col-md-2" style="text-align:center"></div>
+  <div class="col-md-6" style="text-align:center">
+      <div class="btn-group btn-group-lg" role="group" aria-label="...">
+
+          <a id="btn_red_minus" type="button" class="btn btn-danger ">-1</a>
+        
+      </div>
+      
+  </div>
+</div>
 <script>$( document ).ready(function() {
     nav= $('nav').hide();
     var foot = $('footer');
@@ -184,157 +202,253 @@ var fight = {
     fight_id : 1,
     blue_athlete_id:1,
     blue_athlete_name: 'Diaz',
-    blue_score:3,
+    blue_score:0,
     blue_c1:1,
     blue_c2:0,
     red_athlete_id: 1,
     red_athlete_name: 'Perez',
-    red_score:3,
+    red_score:0,
     red_c1:1,
     red_c2:0,                
-    cronometer_secs:2,
-    mins:0,active:1,
+    cronometer_secs:00,
+    cronometer_mins:1,
+    cronometer_active:false,
+    protection_active:false,
     protection_color: '',  
     protection_secs:10,
+    protection_blue_count:0,
+    protection_red_count:0,
+    fault_c1_red_count:0,
+    fault_c2_red_count:0,
+    fault_c1_blue_count:0,
+    fault_c2_blue_count:0,
     finished:0,
+    add_score: function (color,num){
+        var foot = $('footer');
+        
+        sufix = '_score';
+        obj = $('#'+color+sufix);
+        score = obj.html();
+        score = parseInt(score);
+        
+        score = score + num;
+        if (score>=0){
+            obj.html(score); 
+            if (color=='red'){ this.red_score=score; }    ; 
+            if (color=='blue'){ this.blue_score=score; }  ;
+        } 
+    },
+    toggle_crono: function (){
+       if (this.cronometer_active) {
+           this.cronometer_active = false;
+        }else{
+            this.cronometer_active = true;
+        }        
     
-    }
-
+    } ,
     
+    
+    cronometer: function(){
+        if (fight.cronometer_active==true) {
+            if ( this.cronometer_secs>=0 && this.cronometer_mins>=0 ) {    
+                fmt = '';
+                fmt_min='';
+                
+                if (this.cronometer_mins < 10) { fmt_min='0' }
+                
+                if(this.cronometer_secs == 0  ){
+                    //location.reload();
+                    var ds = clearInterval(s);
+                    this.cronometer_secs=59;
+                    if (this.cronometer_secs < 10) { fmt='0' }
+                    this.cronometer_mins--;
+                    if (this.cronometer_mins<0){
+                        document.getElementById("segundos").innerHTML='00';
+                        document.getElementById("minutos").innerHTML='00';
+                        document.title = '00:00';
+                        
+                    }else{
+                        document.getElementById("segundos").innerHTML=fmt+this.cronometer_secs;
+                        document.getElementById("minutos").innerHTML=fmt_min+this.cronometer_mins;
+                        document.title = fmt_min+this.cronometer_mins +':'+fmt+this.cronometer_secs;
+                        this.cronometer_secs =  60;
+                    } 
+                }else{
+                    if (this.cronometer_secs < 10) { fmt='0' }
+                    this.cronometer_secs--;
+                    document.getElementById("segundos").innerHTML=fmt+this.cronometer_secs;
+                    document.title = fmt_min+this.cronometer_mins +':'+fmt+this.cronometer_secs;    
+                }
+            }
+            
+        }
+    },
+    
+    protection: function (){
+             
+        if (this.protection_active==true && this.protection_color!='') {
+           
+            if ( this.protection_secs>=0 ) {
+                
+                console.log('paso 3');    
+                var fmt = '';
+                
+                console.log(this.protection_secs);
+                if (this.protection_secs < 10) { fmt='0' }
+                document.getElementById("protection").innerHTML=fmt+this.protection_secs;
 
+                if(this.protection_secs == 0){
 
+                    alert('perdio '+this.protection_color);
+                }
+            }
+            this.protection_secs--;
+            
+        }   
+        
 
-
-
-start_crono=false;
-start_protection=false;
-
+    }       
+    
+    
+      
+}
 
 
 shortcut.add("1",function() {
-    add_score('blue',1);
+    fight.add_score('blue',1);
 });
 
 shortcut.add("2",function() {
-    add_score('blue',2);
+    fight.add_score('blue',2);
 });
 
 shortcut.add("3",function() {
-   add_score('blue',3);
+   fight.add_score('blue',3);
 });
 
 shortcut.add("X",function() {
-   add_score('blue',-1);
+   fight.add_score('blue',-1);
 });
 
 
 
 shortcut.add("8",function() {
-    add_score('red',1);
+    fight.add_score('red',1);
 });
 
 shortcut.add("9",function() {
-    add_score('red',2);
+    fight.add_score('red',2);
 });
 
 shortcut.add("0",function() {
-   add_score('red',3);
+   fight.add_score('red',3);
 });
 
 shortcut.add("M",function() {
-   add_score('red',-1);
+   fight.add_score('red',-1);
 });
 
 
 shortcut.add("space",function() {
-   if (start_crono) {
-       start_crono = false;
-       //alert("Detener Crono");
-    }else{
-        start_crono = true;
-        //alert("Iniciar Crono");
-    }
+   fight.toggle_crono();
+
 });
-
-
 
 
 
 
 $( "#btn_blue1" ).click(function() {
-   add_score('blue',1);
+   fight.add_score('blue',1);
+});
+
+$( "#btn_blue_minus" ).click(function() {
+   fight.add_score('blue',-1);
 });
 
 $( "#btn_blue2" ).click(function() {
-   add_score('blue',2);
+   fight.add_score('blue',2);
 });
 
 $( "#btn_blue3" ).click(function() {
-   add_score('blue',3);
+   fight.add_score('blue',3);
 });
 
 $( "#btn_bluec1" ).click(function() {
-   add_score('blue',1);
+   fight.add_score('blue',1);
 });
 
 $( "#btn_bluec2" ).click(function() {
-   add_score('blue',1);
+   fight.add_score('blue',1);
 });
 
 $( "#btn_blueprotection" ).click(function() {
 
-   var m1; 
-   fight.protection_color = 'blue';
-   $('#cronometer').toggle();
-   $('#protection').toggle();
-   if (start_protection_blue) {
-       start_protection_blue = false;
-       secs_prot = 10;
-    }else{ start_protection_blue=true;
-     $('#protection').css('color','blue');   
+    fight.protection_color=='blue';
+    if (fight.protection_active ){
+        $('#cronometer').show();
+        $('#protection').hide();        
+        fight.protection_active = false;
+        fight.protection_secs = 10;
+        fight.protection_color='blue';     
+    }else{
+        $('#cronometer').hide();
+        $('#protection').show();
+        fight.protection_active=true;
+        fight.protection_blue_count++;
+        $('#protection').css('color','blue');   
+        fight.protection_color='blue';
+        fight.protection();    
 
-    
     }
+    
+   
 });
 
 
 
 $( "#btn_red1" ).click(function() {
-   add_score('red',1);
+   fight.add_score('red',1);
+});
+
+$( "#btn_red_minus" ).click(function() {
+   fight.add_score('red',-1);
 });
 
 $( "#btn_red2" ).click(function() {
-   add_score('red',2);
+   fight.add_score('red',2);
 });
 
 $( "#btn_red3" ).click(function() {
-   add_score('red',3);
+   fight.add_score('red',3);
 });
 
 $( "#btn_redc1" ).click(function() {
-   add_score('red',1);
+   fight.add_score('red',1);
 });
 
 $( "#btn_redc2" ).click(function() {
-   add_score('red',1);
+   fight.add_score('red',1);
 });
 
 $( "#btn_redprotection" ).click(function() {
-   var m1; 
-   fight.protection_color = 'red';
-   $('#cronometer').toggle();
-   $('#protection').toggle();
-   if (start_protection_red) {
-       start_protection_red = false;
-       secs_prot = 10;
-    }else{ start_protection_red=true;
-     $('#protection').css('color','red');   
+    fight.protection_color=='red';
+    if (fight.protection_active ){
+        $('#cronometer').show();
+        $('#protection').hide();        
+        fight.protection_active = false;
+        fight.protection_secs = 10; 
+        fight.protection_color='red';    
+    }else{
+        $('#cronometer').hide();
+        $('#protection').show();
+        fight.protection_active=true;
+        fight.protection_red_count++;
+        $('#protection').css('color','red');   
+        fight.protection_color='red';
+        fight.protection();    
 
-    
     }
-   
-  
-   
+
 });
 $('#protection').hide();
 
@@ -346,82 +460,12 @@ $('#protection').hide();
 var mins = 3;
 var segs =59;
 var s;
- document.getElementById("minutos").innerHTML='0'+mins;
-function cronometro(){
-    if (start_crono==true) {
-        if ( segs>=0 ) {    
-            fmt = '';
-            fmt_min='';
-            if (segs < 10) { fmt='0' }
-            if (mins < 10) { fmt_min='0' }
-            document.getElementById("segundos").innerHTML=fmt+segs;
-            if(segs == 0){
-                //location.reload();
-                var ds = clearInterval(s);
-                mins--;
-                document.getElementById("minutos").innerHTML=fmt_min+mins;
-                segs =  60; 
-            }
-        }
-        segs--;
-    }
-}
- 
-var m = setInterval('cronometro()', 1000);
+document.getElementById("minutos").innerHTML='0'+mins;
 
-var secs_prot = 10;
-var start_protection_red=false;
-var start_protection_blue=false;
-var color='';
-function protection_blue(){
-    color='blue';
-    if (start_protection_blue==true) {
-        if ( secs_prot>=0 ) {    
-            fmt = '';
-            fmt_min='';
-            if (secs_prot < 10) { fmt='0' }
-            if (mins < 10) { fmt_min='0' }
-            console.log('protenction '+secs_prot);
-            document.getElementById("protection").innerHTML=fmt+secs_prot;
-            //var m = setInterval('protection('+color+')', 1000);
+var m = setInterval('fight.cronometer()', 1000);
 
-            if(secs_prot == 0){
-                //location.reload();
-                alert('perdio '+color);
-            }
-        }
-        secs_prot--;
-    }   
-    
+var m1 = setInterval('fight.protection()', 1000);
 
-}
-
-function protection_red(){
-    color='red';
-    if (start_protection_red==true) {
-        if ( secs_prot>=0 ) {    
-            fmt = '';
-            fmt_min='';
-            if (secs_prot < 10) { fmt='0' }
-            if (mins < 10) { fmt_min='0' }
-            console.log('protenction '+secs_prot);
-            document.getElementById("protection").innerHTML=fmt+secs_prot;
-            //var m = setInterval('protection('+color+')', 1000);
-
-            if(secs_prot == 0){
-                //location.reload();
-                alert('perdio '+color);
-            }
-        }
-        secs_prot--;
-    }   
-    
-
-}
- 
-var m1 = setInterval('protection_red()', 1000);  
-
-var m2 = setInterval('protection_blue()', 1000);   
  
 //]]>
 </script>

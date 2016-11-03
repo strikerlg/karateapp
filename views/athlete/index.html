@@ -1,3 +1,22 @@
+{{right_sidebar_enabled=True}}
 {{extend 'layout.html'}}
+{{block right_sidebar}}
+
+{{=print_admin_menu(6)}}
+
+
+{{end }}
+
+
 <h1>{{=T('Athletes')}}</h1>
+
+{{stractive=''}}
+ <ul class="nav nav-tabs" role="tablist">
+    {{for cat in categories:}}
+    {{stractive =' class="active" ' if int(cat.id)==int(cat_id) else ' ' }}
+    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('athlete','index',vars=dict(category_id=cat.id))}}" aria-controls="home" role="tab" ><strong>{{=cat.name}}</strong></a></li>
+    {{pass}}
+</ul>
+
+
 {{=grid}}

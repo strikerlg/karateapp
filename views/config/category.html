@@ -1,3 +1,10 @@
+{{right_sidebar_enabled=True}}
 {{extend 'layout.html'}}
-<h1>{{=T('categories')}}</h1>
+{{block right_sidebar}}
+
+{{=print_admin_menu(1)}}
+
+
+{{end }}
+<h1>{{=T('Categories')}}</h1>
 {{=grid}}

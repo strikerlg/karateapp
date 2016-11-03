@@ -2,16 +2,19 @@
 <h1>{{=T('matchs')}}</h1>
 <table class="table">
     <tr>
-        <td>ID</td>
-        <td>COMPETIDORES</td>
-        <td>&nbsp;</td>
+        <th>{{=T('id')}}</th>
+        <th>{{=T('Athletes')}}</th>
+        <th>{{=T('Tatami')}}</th>
+        <th>&nbsp;</th>
         
     </tr>
 {{for record in matchs:}}
     <tr>
-        <td>{{=record.id}}</td>
-        <td>{{=record.competitor_blue_id}} vs {{=record.competitor_red_id}} </td>
-        <td><a type="button" target="_blank"  href="{{=URL('dashboard','index')}}" class="btn btn-primary btn-xs">Tablero de Control</a>
+        <td>{{=record.fight.id}}</td>
+        <td>{{=record.athlete_blue.name}} {{=IMG( _width="50px",_heigth="50px",_src= URL('default', 'download', args=[record.athlete_blue.photo]),_alt="",_class="img-rounded" )}} <strong> 
+                  vs  {{=IMG( _width="50px",_heigth="50px",_src= URL('default', 'download', args=[record.athlete_red.photo]),_alt="",_class="img-rounded" )}}</strong> {{=record.athlete_red.name}} </td>
+        <td></td>
+        <td><a type="button" target="_blank"  href="{{=URL('dashboard','index',vars=dict(match_id=record.fight.id)) }}" class="btn btn-primary btn-xs">Tablero de Control</a>
             <a type="button" target="_blank"  href="{{=URL('dashboard','projection')}}" class="btn btn-primary btn-xs">Monitor</a>
         </td>
         

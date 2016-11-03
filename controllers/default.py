@@ -10,34 +10,21 @@
 
 
 def index():
-    """
-    example action using the internationalization operator T and flash
-    rendered by views/default/index.html or views/generic.html
 
-    if you need a simple wiki simply replace the two lines below with:
-    return auth.wiki()
-    """
     tournaments = db(db.tournament.id>0).select()
     return dict(tournaments=tournaments)
 
 def matchs():
-    """
-    example action using the internationalization operator T and flash
-    rendered by views/default/index.html or views/generic.html
-
-    if you need a simple wiki simply replace the two lines below with:
-    return auth.wiki()
-    """
-    matchs = db(db.fight.id>0).select()
+    Athlete_red  =  db.athlete.with_alias('athlete_red')
+    Athlete_blue  =  db.athlete.with_alias('athlete_blue')
+    matchs = db(  db.fight.id>0).select( db.fight.ALL, Athlete_red.ALL, Athlete_blue.ALL,
+                                                            left=(  Athlete_red.on(Athlete_red.id == db.fight.athlete_red_id),
+                                                                      Athlete_blue.on(Athlete_blue.id == db.fight.athlete_blue_id )    
+                                                            ))
     return dict(matchs=matchs)
+    
 def users():
-    """
-    example action using the internationalization operator T and flash
-    rendered by views/default/index.html or views/generic.html
 
-    if you need a simple wiki simply replace the two lines below with:
-    return auth.wiki()
-    """
     objs = SQLFORM.grid(db.auth_user)
     return dict(objs=objs)
 def user():

@@ -1,8 +1,23 @@
 {{extend 'layout.html'}}
 <style>
-
-
-
+#label_tatami {
+font-size:32px;
+color:white;
+text-align:center;
+padding-top:0px;        
+}
+#label_tournament {
+font-size:32px;
+color:white;
+text-align:center;
+padding-top:0px;        
+}
+#label_category{
+font-size:32px;
+color:white;
+text-align:center;
+padding-top:0px;        
+}
 #blue_header {
 color:blue;
 text-align:center;
@@ -27,8 +42,8 @@ padding-top:0px;
 
         
 }
-#competitor_blue {
-font-size:100px;
+#athlete_blue {
+font-size:46px;
 color:blue;
 text-align:center;
 
@@ -42,109 +57,177 @@ text-align:center;
 padding-top:0px;  
 }
     
-#competitor_red {
-    font-size:100px;
+#athlete_red {
+    font-size:46px;
 color:red;
 text-align:center;   
 }
     
 #cronometer {
-    font-size:100px;
+    font-size:56px;
 color:yellow;
 text-align:center;   
 }
 #protection {
-    font-size:100px;
+    font-size:56px;
     color:white;
     text-align:center;   
     //visibility:hidden;
     //display:none;
 }
 body {
-    
+    background-color:#000;
     padding-top:0px;
     padding-bottom;0px;
     }
 </style>
+
+
+
+
 <div class="row">
-  <div class="col-md-4" style="text-align:center"><div id="competitor_blue" >DIAZ</div></div>
+  <div class="col-md-4" style="text-align:center"><div id="athlete_blue" >...</div></div>
   <div class="col-md-4" style="text-align:center">  
       <div id="cronometer" > <span id="minutos">60</span> : <span id="segundos">00</span> </div> 
       <div id="protection" >10</div> 
-  </div>
-  
-  <div class="col-md-4" style="text-align:center"><div id="competitor_red" >PEREZ</div></div>
+  </div> 
+  <div class="col-md-4" style="text-align:center"><div id="athlete_red" >..</div></div>
 </div>
+
+
 <div class="row">
-  <div class="col-md-4" style="text-align:center"><span id="blue_score" >0</span></div>
+  <div class="col-md-4" style="text-align:center"><span id="blue_score" >0</span> 
+  
+
+  
+  </div>
   <div class="col-md-4" style="text-align:center">
-      <div class="btn-group" data-toggle="buttons">
+ 
+ 
+ 
+ 
+ 
+ 
+       <div class="btn-group" data-toggle="buttons">
        <table class="table" valign="middle">
         <tr>
             <th>&nbsp;</th>
-            <th><span id="blue_header">CAT 1 </span></th>
-            <th><span id="blue_header">CAT 2 </span></th>
-            <th>&nbsp;</th>
-            <th><span id="red_header">CAT 1 </span></th>
-            <th><span id="red_header">CAT 2 </span></th>
+            <th><div id="blue_header">CAT1</div></th>
+            <th><div id="blue_header">CAT2</div></th>
+
         </tr>
         <tr>
             <td>C</td>
             <td> <input type="checkbox" autocomplete="off"></td>
             <td> <input type="checkbox" autocomplete="off"></td>
-            <td>&nbsp;</td>
+
+        </tr>   
+         <tr>
+            <td>K</td>
             <td> <input type="checkbox" autocomplete="off"></td>
             <td> <input type="checkbox" autocomplete="off"></td>
+
+        </tr>      
+              <tr>
+            <td>K</td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+
         </tr>   
         
-        <tr>
+        
+                 <tr>
             <td>K</td>
-            <td><input type="checkbox" autocomplete="off"></td>
-            <td><input type="checkbox" autocomplete="off"></td>
-            <td>&nbsp;</td>
-            <td><input type="checkbox" autocomplete="off"></td>
-            <td><<input type="checkbox" autocomplete="off"></td>
-        </tr>   
-        <tr>
-            <td>HC</td>
-            <td><input type="checkbox" autocomplete="off"></td>
-            <td><input type="checkbox" autocomplete="off"></td>
-             <td>&nbsp;</td>
-            <td><input type="checkbox" autocomplete="off"></td>
-            <td><input type="checkbox" autocomplete="off"></td>
-        </tr>       
-        <tr>
-            <td>H</td>
-            <td><input type="checkbox" autocomplete="off"></td>
-            <td><input type="checkbox" autocomplete="off"></td>
-             <td>&nbsp;</td>
-            <td><input type="checkbox" autocomplete="off"></td>
-            <td><input type="checkbox" autocomplete="off"></td>
-        </tr>                          
+            <td> <input type="checkbox" autocomplete="off"></td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+
+        </tr>                               
        </table>
     </div>
-    
+
+
+
+       <div class="btn-group" data-toggle="buttons">
+       <table class="table" valign="middle">
+        <tr>
+            <th>&nbsp;</th>
+            <th><div id="red_header">CAT1</div></th>
+            <th><div id="red_header">CAT2</div></th>
+
+        </tr>
+        <tr>
+            <td>C</td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+
+        </tr>   
+         <tr>
+            <td>K</td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+
+        </tr>      
+              <tr>
+            <td>K</td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+
+        </tr>   
+        <tr>
+            <td>K</td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+            <td> <input type="checkbox" autocomplete="off"></td>
+
+        </tr>                               
+       </table>
+    </div>
   </div>
-  <div class="col-md-4" style="text-align:center"><span id="red_score">0</span></div>
+  <div class="col-md-4" style="text-align:center">
+      
+   
+      <span id="red_score">0</span>
+  
+  
+  
+  
+  </div>
 </div>
 
 
-<div class="row">
-  <div class="col-md-4" style="text-align:center"> 
 
-    
-   </div>
-  <div class="col-md-4" style="text-align:center"> </div>
-  <div class="col-md-4" style="text-align:center">  </div>
-</div>
+
+
+
+
 
 
 <div class="row">
   <div class="col-md-6" style="text-align:center">
-      <div class="btn-group btn-group-lg" role="group" aria-label="...">
-          <a id="btn_blue1" type="button" class="btn btn-primary ">+1</a>          
-          <a id="btn_blue2" type="button" class="btn btn-primary ">+2</a>
-          <a id="btn_blue3" type="button" class="btn btn-primary ">+3</a>
+      <div class="btn-group btn-group-md" role="group" aria-label="...">
+          <a id="btn_blue1" type="button" class="btn btn-primary ">Yuko</a>          
+          <a id="btn_blue2" type="button" class="btn btn-primary ">Wazari</a>
+          <a id="btn_blue3" type="button" class="btn btn-primary ">Ippon</a>
+
+      </div>
+      
+  </div>
+  <div class="col-md-2" style="text-align:center"></div>
+  <div class="col-md-6" style="text-align:center">
+      <div class="btn-group btn-group-md" role="group" aria-label="...">
+
+          <a id="btn_red1" type="button" class="btn btn-danger ">Yuko</a>
+          <a id="btn_red2" type="button" class="btn btn-danger ">Wazari</a>
+          <a id="btn_red3" type="button" class="btn btn-danger ">Ippon</a> 
+
+      </div>
+      
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6" style="text-align:center">
+      <div class="btn-group btn-group-md" role="group" aria-label="...">
+          <a id="btn_blue_minus" type="button" class="btn btn-primary ">-1</a>          
           <a id="btn_bluec1" type="button" class="btn btn-primary ">C1</a>
           <a id="btn_bluec2" type="button" class="btn btn-primary ">C2</a>
           <a id="btn_blueprotection" type="button" class="btn btn-primary ">10''</a> 
@@ -153,36 +236,23 @@ body {
   </div>
   <div class="col-md-2" style="text-align:center"></div>
   <div class="col-md-6" style="text-align:center">
-      <div class="btn-group btn-group-lg" role="group" aria-label="...">
+      <div class="btn-group btn-group-md" role="group" aria-label="...">
 
-          <a id="btn_red1" type="button" class="btn btn-danger ">+1</a>
-          <a id="btn_red2" type="button" class="btn btn-danger ">+2</a>
-          <a id="btn_red3" type="button" class="btn btn-danger ">+3</a> 
-          <a id="btn_redc1" type="button" class="btn btn-danger ">C1</a>
+          <a id="btn_red_minus" type="button" class="btn btn-danger ">-1</a>
+                    <a id="btn_redc1" type="button" class="btn btn-danger ">C1</a>
           <a id="btn_redc2" type="button" class="btn btn-danger ">C2</a>   
           <a id="btn_redprotection" type="button" class="btn btn-danger ">10''</a>        
+        
       </div>
       
   </div>
 </div>
 
+
 <div class="row">
-  <div class="col-md-6" style="text-align:center">
-      <div class="btn-group btn-group-lg" role="group" aria-label="...">
-          <a id="btn_blue_minus" type="button" class="btn btn-primary ">-1</a>          
-
-      </div>
-      
-  </div>
-  <div class="col-md-2" style="text-align:center"></div>
-  <div class="col-md-6" style="text-align:center">
-      <div class="btn-group btn-group-lg" role="group" aria-label="...">
-
-          <a id="btn_red_minus" type="button" class="btn btn-danger ">-1</a>
-        
-      </div>
-      
-  </div>
+  <div class="col-md-4" style="text-align:center"><div id="label_tatami" >Tatami 1</div></div>
+  <div class="col-md-4" style="text-align:center">    <div id="label_tournament" >OPEN  DE VENEZUELA</div> </div>
+  <div class="col-md-4" style="text-align:center"><div id="label_category" >MASTER+65</div></div>
 </div>
 <script>$( document ).ready(function() {
     nav= $('nav').hide();
@@ -192,6 +262,7 @@ body {
     body.css('background','black');
     social=$('#socialdrawer');
     social.hide();
+     fight.print_names();
     });
 </script>
 
@@ -199,19 +270,20 @@ body {
 <script language="JavaScript">
 
 var fight = {
-    fight_id : 1,
-    blue_athlete_id:1,
-    blue_athlete_name: 'Diaz',
+    fight_id : {{=record.fight.id}},
+    blue_athlete_id:'{{=record.athlete_blue.id}}',
+    blue_athlete_name: '{{=record.athlete_blue.name}}',
     blue_score:0,
-    blue_c1:1,
+    blue_c1:0,
     blue_c2:0,
-    red_athlete_id: 1,
-    red_athlete_name: 'Perez',
+    red_athlete_id: '{{=record.athlete_red.id}}',
+    red_athlete_name: '{{=record.athlete_red.name}}',
     red_score:0,
-    red_c1:1,
-    red_c2:0,                
+    red_c1:0,
+    red_c2:0,   
+    winner_athlete_id:0,             
     cronometer_secs:00,
-    cronometer_mins:1,
+    cronometer_mins:3,
     cronometer_active:false,
     protection_active:false,
     protection_color: '',  
@@ -223,7 +295,20 @@ var fight = {
     fault_c1_blue_count:0,
     fault_c2_blue_count:0,
     finished:0,
+    
+    set_winner: function (winner_id){
+        
+        this.winner_athlete_id = winner_id;
+        
+    },
+    
+    print_names: function (){
+        $('#athlete_blue').html(this.blue_athlete_name);
+        $('#athlete_red').html(this.red_athlete_name);
+        
+    },
     add_score: function (color,num){
+        
         var foot = $('footer');
         
         sufix = '_score';
@@ -232,24 +317,27 @@ var fight = {
         score = parseInt(score);
         
         score = score + num;
-        if (score>=0){
+        if (score>=0 && fight.cronometer_active && this.finished==0){
             obj.html(score); 
             if (color=='red'){ this.red_score=score; }    ; 
             if (color=='blue'){ this.blue_score=score; }  ;
         } 
     },
     toggle_crono: function (){
-       if (this.cronometer_active) {
-           this.cronometer_active = false;
-        }else{
-            this.cronometer_active = true;
-        }        
+        
+        if (this.protection_active ==false){
+           if (this.cronometer_active) {
+               this.cronometer_active = false;
+            }else{
+                this.cronometer_active = true;
+            }        
+        }
     
     } ,
     
     
     cronometer: function(){
-        if (fight.cronometer_active==true) {
+        if (fight.cronometer_active==true && this.finished==0) {
             if ( this.cronometer_secs>=0 && this.cronometer_mins>=0 ) {    
                 fmt = '';
                 fmt_min='';
@@ -281,12 +369,13 @@ var fight = {
                 }
             }
             
+
         }
     },
     
     protection: function (){
              
-        if (this.protection_active==true && this.protection_color!='') {
+        if (this.protection_active==true && this.protection_color!='' && this.finished==0) {
            
             if ( this.protection_secs>=0 ) {
                 
@@ -299,7 +388,7 @@ var fight = {
 
                 if(this.protection_secs == 0){
 
-                    alert('perdio '+this.protection_color);
+                     document.getElementById("protection").innerHTML="Finalizado";
                 }
             }
             this.protection_secs--;
@@ -307,11 +396,19 @@ var fight = {
         }   
         
 
-    }       
+    },
+    
+    sync2db: function(){
+        if ( this.protection_active || this.cronometer_active)  {
+            $.post( "save_fight_log", {data:JSON.stringify(fight)} );   
+        }
+    }      
     
     
       
 }
+
+
 
 
 shortcut.add("1",function() {
@@ -329,8 +426,6 @@ shortcut.add("3",function() {
 shortcut.add("X",function() {
    fight.add_score('blue',-1);
 });
-
-
 
 shortcut.add("8",function() {
     fight.add_score('red',1);
@@ -388,12 +483,14 @@ $( "#btn_blueprotection" ).click(function() {
         $('#cronometer').show();
         $('#protection').hide();        
         fight.protection_active = false;
+        //fight.cronometer_active = true;
         fight.protection_secs = 10;
         fight.protection_color='blue';     
     }else{
         $('#cronometer').hide();
         $('#protection').show();
         fight.protection_active=true;
+        fight.cronometer_active = false;
         fight.protection_blue_count++;
         $('#protection').css('color','blue');   
         fight.protection_color='blue';
@@ -436,12 +533,14 @@ $( "#btn_redprotection" ).click(function() {
         $('#cronometer').show();
         $('#protection').hide();        
         fight.protection_active = false;
+        //fight.cronometer_active = true;
         fight.protection_secs = 10; 
         fight.protection_color='red';    
     }else{
         $('#cronometer').hide();
         $('#protection').show();
         fight.protection_active=true;
+        fight.cronometer_active=false;
         fight.protection_red_count++;
         $('#protection').css('color','red');   
         fight.protection_color='red';
@@ -466,6 +565,7 @@ var m = setInterval('fight.cronometer()', 1000);
 
 var m1 = setInterval('fight.protection()', 1000);
 
- 
+var m3 = setInterval('fight.sync2db()', 500);
+
 //]]>
 </script>

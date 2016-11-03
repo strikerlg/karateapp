@@ -1,3 +1,10 @@
+{{right_sidebar_enabled=True}}
 {{extend 'layout.html'}}
+{{block right_sidebar}}
+
+{{=print_admin_menu(2)}}
+
+
+{{end }}
 <h1>{{=T('states')}}</h1>
 {{=grid}}

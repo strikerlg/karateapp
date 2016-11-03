@@ -1,0 +1,43 @@
+{{extend 'layout.html'}}
+{{import json}}
+<h1>{{=T('Match by Bracket')}}</h1>
+{{stractive=''}}
+ <ul class="nav nav-tabs" role="tablist">
+    {{for cat in categories:}}
+    {{stractive =' class="active" ' if int(cat.id)==int(cat_id) else ' ' }}
+    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('fight','bracket',vars=dict(category_id=cat.id))}}" aria-controls="home" role="tab" ><strong>{{=cat.name}}</strong></a></li>
+    {{pass}}
+</ul>
+
+<style>
+div.jQBracket .team {
+    background-color: #000;
+   
+}
+</style>
+
+<div id="minimal" class="demo"> </div>
+<script>
+    var minimalData = {
+    teams : {{ data = [ [rs['blue'],rs['red']] for rs in fights  ] }} {{response.write(json.dumps(data),escape=False)}},
+    results : [
+    //       [[1,2], [3,4]],       /* first round */   /* first round */
+   /* second round */
+    ]
+  }
+ 
+$(function() {
+    $('#minimal').bracket({
+      init: minimalData /* data to initialize the bracket with */ })
+  })
+
+
+</script>
+
+<script>$( document ).ready(function() {
+    
+    //body= $('body');
+    //body.css('background','black');
+    
+    });
+</script>

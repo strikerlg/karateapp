@@ -30,14 +30,28 @@ response.google_analytics_id = None
 
 response.menu = [
     (T('Home'), False, URL('default', 'index'), []),
+    (T('Athletes'), False, URL('athlete', 'index'), []),
+    (T('Matchs'), False, URL('fight', 'index'), [
+        (T('By category'), False, URL('fight', 'index'), []),
+        (T('By Brackets'), False, URL('fight', 'bracket'), []),
+        (T('By Date'), False, URL('fight', 'bracket'), []),
+
+    ]),
     (T('Configuration'), False, URL('config', 'index'), [
-       (T('Tournament'), False, URL('config', 'index'), []), 
-       (T('Schools'), False, URL('config', 'schools'), []), 
+       (T('Tournament'), False, URL('config', 'index'), []),
+        (T('Tatamis'), False, URL('config', 'tatami'), []), 
+
+       (T('Categories'), False, URL('config', 'category'), []),  
+       (T('State'), False, URL('config', 'state'), []), 
+       (T('Schools'), False, URL('config', 'school'), []), 
       
        (T('Dojo'), False, URL('config', 'dojo'), []), 
-       (T('State'), False, URL('config', 'state'), []), 
+
         (T('Users'), False, URL('config', 'users'), []), 
+        (T('Athletes'), False, URL('athlete', 'index'), []), 
+        (T('Generate Matchs'), False, URL('fight', 'generate_matchs'), []), 
     ])
+  
 ]
 
 DEVELOPMENT_MENU = False
@@ -157,3 +171,33 @@ if DEVELOPMENT_MENU:
 
 if "auth" in locals():
     auth.wikimenu()
+    
+    
+    
+def print_admin_menu( default_ ):
+     
+     
+    list_options_html=""
+    str_active =""
+    for idx,m in enumerate(response.menu[3][3]):
+        str_active = 'active' if  m[2] in request.env['request_uri'] else ''
+            
+        list_options_html+='<li class="list-group-item '+str_active+'" >'+str(A( m[0], _href=m[2] ))+'</li>'
+    
+    
+    html="""
+     <div class="panel panel-info">
+  <div class="panel-heading"><h3 class="panel-title"><a class="btn-block"
+      href="URL('admin','default','index')}}">
+      <i class="glyphicon glyphicon-cog"></i>
+      {{=T("admin")}}
+    </a></h3></div>
+  <div class="panel-body">
+   
+  </div>
+  <ul class="list-group">
+  %s
+  </ul>
+</div>
+    """ % list_options_html
+    return XML(html)

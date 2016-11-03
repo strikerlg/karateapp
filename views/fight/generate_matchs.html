@@ -1,0 +1,9 @@
+{{extend 'layout.html'}}
+
+<h1>{{=T('Generate Matchs')}}</h1>
+
+
+<ul>
+    {{for m in message:}}
+<li>{{=XML(m)}}</li>{{pass}}
+</u>

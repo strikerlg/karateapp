@@ -109,7 +109,7 @@ mail.settings.ssl = myconf.get('smtp.ssl') or False
 auth.settings.registration_requires_verification = False
 auth.settings.registration_requires_approval = False
 auth.settings.reset_password_requires_verification = True
-
+auth.settings.create_user_groups = None
 # -------------------------------------------------------------------------
 # Define your tables below (or better in another model file) for example
 #
@@ -133,22 +133,24 @@ auth.settings.reset_password_requires_verification = True
 # auth.enable_record_versioning(db)
 
 db.define_table('school',
-               Field('name', label = T('name')),
+               Field('name', label = T('name'),requires=IS_UPPER()),
                format = "%(name)s",
                )
                
 db.define_table('states',
                Field('code'),
-               Field('name', label = T('name')),
+               Field('name', label = T('name') ,requires=IS_UPPER()),
                format = "%(name)s",
                )
 db.define_table('tournament',
-               Field('name', label = T('name'),requires=IS_NOT_EMPTY()),
+               Field('name', label = T('name'),requires=[IS_NOT_EMPTY(), IS_UPPER()]),
+               Field('description', label = T('descriptions'),requires=IS_NOT_EMPTY()),
                Field('date_start','datetime', label = T('date_start')),
+               Field('bracket','boolean',writable=False,default=False),
                format = "%(name)s",
                )
 db.define_table('dojo',
-               Field('name', label = T('name')),
+               Field('name', label = T('name') , requires = IS_UPPER() ),
                Field('school_id',db.school, label = T('school')),
                Field('state_id',db.states, label = T('state')),
                format = "%(name)s",
@@ -161,7 +163,7 @@ db.define_table('tatami',
                )
 
 db.define_table('category',
-               Field('name', label = T('name')),
+               Field('name', label = T('name'), requires = IS_UPPER()),
                Field('tournament_id',db.tournament, label = T('tournament')),
                format = "%(name)s",
                )
@@ -169,8 +171,9 @@ db.define_table('athlete',
                Field('tournament_id',db.tournament, label = T('tournament')),
                Field('photo','upload',requires=IS_IMAGE()),
                Field('identity_number','string', label = T('identity_number'),requires=IS_NOT_EMPTY() ),
-               Field('name', label = T('name')),
-               Field('birth_date','date', label = T('birth_date')),
+               Field('gender', label = T('gender'), requires=IS_IN_SET(['M', 'F'])),
+               Field('name', label = T('name') ,requires = IS_UPPER()),
+               Field('birth_date','date', label = T('birth_date'), requires = IS_DATE(format = '%d/%m/%Y')),
                Field('age', 'integer',label = T('age')),
                Field('dojo_id',db.dojo, label = T('dojo')),
                Field('category_id',db.category, label = T('category'))                            
@@ -179,32 +182,68 @@ db.define_table('athlete',
 db.define_table('fight',
                Field('tournament_id',db.tournament, label = T('tournament_id')),
                Field('tatami_id',db.tatami, label = T('tatami')),
-               Field('athlete_blue_id', label = T('athlete_blue'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
-               Field('athlete_red_id', label = T('athlete_red'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
-               Field('athlete_win_id', label = T('athlete_win'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))),
+               Field('athlete_blue_id','integer', label = T('athlete_blue'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
+               Field('athlete_red_id','integer', label = T('athlete_red'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
+               Field('athlete_win_id','integer', label = T('athlete_win'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
                Field('red_score','integer', label = T('red_score')),
                Field('blue_score','integer', label = T('blue_score')),
                Field('start_date','datetime', label = T('start_date')),
-               Field('fight_status','integer', label = T('fight_status')),
-               Field('phase','integer', label = T('phase'))
+               Field('finished','boolean', label = T('finished')),
+               Field('phase','integer', label = T('phase')),
+               Field('referee_id','integer', label = T('referee')),
+               Field('category_id',db.category)
                
                )
 
-db.define_table('fight_balance',
+db.define_table('fight_score_detail',
+               Field('fight_id',db.fight, label = T('fight')),
+               Field('athlete_id',db.athlete, label = T('athlete')),
+               Field('textevent','string', label = T('event')),
+               Field('val','integer', label = T('name')),
+               Field('cronometer_secs','integer', label = T('secs')),
+               Field('cronometer_mins','integer', label = T('mins')),                              
+               )
+
+db.define_table('fight_fault_detail',
                Field('fight_id',db.fight, label = T('fight')),
                Field('athlete_id',db.athlete, label = T('athlete')),
                Field('event_id','text', label = T('event')),
-               Field('blue_score','integer', label = T('name')),
-               Field('cronometer_secs','integer', label = T('name')),
-               Field('cronometer_mins','integer', label = T('name')), 
-               Field('phase','integer', label = T('name'))
-               
+               Field('val','integer', label = T('name')),
+               Field('cronometer_secs','integer', label = T('secs')),
+               Field('cronometer_mins','integer', label = T('mins')),                              
                )
 
 db.define_table('fight_json',
                Field('fight_id',db.fight, label = T('fight')),
-               Field('data_log',db.athlete, label = T('json_data')),
+               Field('data_log','text', label = T('json_data')),
                
                )
 
+
+def auto_create_membership(field_,id_):
+    db.auth_membership.insert(user_id=id_,group_id=field_['group_id'])
+    
+def auto_update_membership(set_,field_): # set object represent  (db.table.id==1)
+    user = set_.select(db.auth_user.id).first()
+    user_member = db(db.auth_membership.user_id==user.id).update(group_id=field_['group_id'])
+           
+db.auth_user._after_insert.append(lambda field,id: auto_create_membership(field,id))
+db.auth_user._before_update.append(lambda set_, field_: auto_update_membership(set_, field_))
+
+#db.auth_user.group
+
 T.force('es-es')
+
+def init_data():
+  if db(db.auth_group.id>0).isempty():
+    admin_id= db.auth_group.insert(role = 'admin', description= 'Administrator')
+    db.auth_group.insert(role = 'referee', description= 'Referee')
+    db.commit()
+  if db(db.auth_user.id>0).isempty():
+    user_id = db.auth_user.bulk_insert([{'first_name' : 'admin', 
+                              'group_id':admin_id,
+                               'last_name' : 'admin', 
+                               'email' : 'admin@karateapp.com', 
+                               'password' : db.auth_user.password.validate('1q2w3e.')[0]}])
+   
+init_data()

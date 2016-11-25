@@ -35,62 +35,6 @@
 	},
 	"buffers":
 	[
-		{
-			"file": "views/config/tatami.html",
-			"settings":
-			{
-				"buffer_size": 154,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "views/config/dojo.html",
-			"settings":
-			{
-				"buffer_size": 152,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "views/config/school.html",
-			"settings":
-			{
-				"buffer_size": 154,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "views/config/state.html",
-			"settings":
-			{
-				"buffer_size": 153,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "views/config/category.html",
-			"settings":
-			{
-				"buffer_size": 157,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "views/config/index.html",
-			"settings":
-			{
-				"buffer_size": 189,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "models/menu.py",
-			"settings":
-			{
-				"buffer_size": 8956,
-				"line_ending": "Unix"
-			}
-		}
 	],
 	"build_system": "",
 	"command_palette":
@@ -116,23 +60,24 @@
 	},
 	"file_history":
 	[
+		"/home/diazejv/apps/web2py/applications/karateapp/models/menu.py",
+		"/home/diazejv/apps/web2py/applications/karateapp/views/config/index.html",
+		"/home/diazejv/apps/web2py/applications/karateapp/views/config/category.html",
+		"/home/diazejv/apps/web2py/applications/karateapp/views/config/state.html",
+		"/home/diazejv/apps/web2py/applications/karateapp/views/config/school.html",
+		"/home/diazejv/apps/web2py/applications/karateapp/views/config/dojo.html",
+		"/home/diazejv/apps/web2py/applications/karateapp/views/config/tatami.html",
 		"/home/diazejv/apps/web2py/applications/karateapp/views/config/index.html.bak",
 		"/home/diazejv/apps/web2py/applications/karateapp/controllers/fight.py",
 		"/home/diazejv/apps/web2py/applications/karateapp/views/fight/generate_matchs.html",
 		"/home/diazejv/apps/web2py/applications/karateapp/controllers/config.py",
-		"/home/diazejv/apps/web2py/applications/karateapp/views/config/tatami.html",
 		"/home/diazejv/apps/web2py/applications/karateapp/views/fight/index.html",
-		"/home/diazejv/apps/web2py/applications/karateapp/models/menu.py",
 		"/home/diazejv/apps/web2py/applications/karateapp/views/athlete/index.html",
 		"/home/diazejv/apps/web2py/applications/karateapp/controllers/athlete.py",
 		"/home/diazejv/apps/web2py/applications/karateapp/models/db.py",
 		"/home/diazejv/apps/web2py/applications/karateapp/views/fight/bracket.html",
 		"/home/diazejv/apps/web2py/applications/karateapp/controllers/dashboard.py",
 		"/home/diazejv/apps/web2py/applications/karateapp/private/appconfig.ini",
-		"/home/diazejv/apps/web2py/applications/karateapp/views/config/category.html",
-		"/home/diazejv/apps/web2py/applications/karateapp/views/config/dojo.html",
-		"/home/diazejv/apps/web2py/applications/karateapp/views/config/school.html",
-		"/home/diazejv/apps/web2py/applications/karateapp/views/config/state.html",
 		"/home/diazejv/apps/web2py/applications/karateapp/views/dashboard/index.html",
 		"/home/diazejv/.config/sublime-text-2/Packages/User/Preferences.sublime-settings",
 		"/home/diazejv/.config/sublime-text-2/Packages/Default/Preferences.sublime-settings"
@@ -171,193 +116,8 @@
 	"groups":
 	[
 		{
-			"selected": 6,
 			"sheets":
 			[
-				{
-					"buffer": 0,
-					"file": "views/config/tatami.html",
-					"settings":
-					{
-						"buffer_size": 154,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "views/config/dojo.html",
-					"settings":
-					{
-						"buffer_size": 152,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "views/config/school.html",
-					"settings":
-					{
-						"buffer_size": 154,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "views/config/state.html",
-					"settings":
-					{
-						"buffer_size": 153,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "views/config/category.html",
-					"settings":
-					{
-						"buffer_size": 157,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "views/config/index.html",
-					"settings":
-					{
-						"buffer_size": 189,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								187,
-								187
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "models/menu.py",
-					"settings":
-					{
-						"buffer_size": 8956,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								8544,
-								8544
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2475.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				}
 			]
 		}
 	],

@@ -32,7 +32,7 @@ def bracket():
      from fight a 
      left join athlete b1 on a.athlete_blue_id = b1.id 
      left join athlete b2 on a.athlete_red_id = b2.id
-     where a.category_id=%s limit 32
+     where a.category_id=%s and phase=1 order by a.id limit 32
 
      """%str(cat_id)
      ,as_dict=True)
@@ -47,7 +47,9 @@ def generate_matchs():
 
 
     categories = db(db.category.id>0).select(db.category.ALL)
-
+    gender =  db(db.gender.id>0).select(db.gender.ALL)
+    perfect_match = [2,4,8,16,32,64]
+    phase = 1
     for cat in categories:
         athletes_count = db( (db.athlete.id>0 )& (db.athlete.category_id == cat.id) ).count()
         athletes = [ rs.id for rs in  db((db.athlete.id>0 )& (db.athlete.category_id == cat.id)).select(db.athlete.id)]
@@ -82,24 +84,53 @@ def generate_matchs():
                 athletes.remove(val)
             return val
             
-           
-            
-        if is_divisible(matchs_count):
-            if is_fight_empty(cat.id):
-                for i in xrange(int(matchs_count)):
+        val_ = 0
+        for v in perfect_match:
+            val_ = matchs_count / v
+            if val_ == 1:
+
+             val_ =v
+             break
+            elif val_ <1:
+
+             val_ = v
+             break         
+
+
+        if is_fight_empty(cat.id):
+            for i in xrange(int(val_)):
+                db.fight.insert(
+                    tournament_id = 1,
+                    phase = phase,
+                    fight_num = i+1,
+                    athlete_blue_id =pick_athlete(),
+                    athlete_red_id = pick_athlete(),
+                    category_id = cat.id
+                    
+                )
+
+            while val_%2 == 0 and val_>0:
+                 val_ = val_/2
+                 phase = phase+1
+                 for i in xrange(int(val_)):
+                    import math
+                    next_combate = math.ceil(i+1/2.0)
                     db.fight.insert(
                         tournament_id = 1,
-                        athlete_blue_id =pick_athlete(),
-                        athlete_red_id = pick_athlete(),
+                        phase = phase,
+                        fight_num = i+1,
+                        athlete_blue_id =None,
+                        athlete_red_id = None,
                         category_id = cat.id
-                        
-                    )
-                mensaje.append("CARGA CATEGORIA %s OK, %s COMBATES CARGADOS "% (str(B(cat.name)) , str(matchs_count)))
-            else:
-                mensaje.append("CARGA CATEGORIA %s FALLO POR: EXISTEN COMBATES  YA CARGADOS"% (str(B(cat.name))))
+                    
+                     )
+                     
+
+            mensaje.append("CARGA CATEGORIA %s OK, %s COMBATES CARGADOS "% (str(B(cat.name)) , str(matchs_count)))
         else:
-            mensaje.append("CARGA CATEGORIA %s FALLO POR: CANTIDAD DE ATLETAS NO ES DIVISIBLE ENTRE 2,4,8,16... " % str(B(cat.name)))
-    
+            mensaje.append("CARGA CATEGORIA %s FALLO POR: EXISTEN COMBATES  YA CARGADOS"% (str(B(cat.name))))
+
+
     
     
     return dict(message=mensaje)

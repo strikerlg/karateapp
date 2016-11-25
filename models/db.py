@@ -90,7 +90,7 @@ plugins = PluginManager()
 # -------------------------------------------------------------------------
 # create all tables needed by auth if not custom tables
 # -------------------------------------------------------------------------
-auth.settings.extra_fields['auth_user'] =[ Field('group_id', 'integer', label = T('Role')) ]
+auth.settings.extra_fields['auth_user'] =[ Field('group_id', 'integer', label = T('Role')) , Field('tatami_id', 'integer', label = T('Tatami'))]
 auth.define_tables(username=False, signature=False)
 
 # -------------------------------------------------------------------------
@@ -132,6 +132,18 @@ auth.settings.create_user_groups = None
 # -------------------------------------------------------------------------
 # auth.enable_record_versioning(db)
 
+
+db.define_table('grade',
+
+               Field('name', label = T('name'),requires=IS_UPPER()),
+               format = "%(name)s",
+                )
+
+db.define_table('gender',
+
+               Field('name', label = T('name'),requires=IS_UPPER()),
+               format = "%(name)s",
+                )
 db.define_table('school',
                Field('name', label = T('name'),requires=IS_UPPER()),
                format = "%(name)s",
@@ -165,22 +177,42 @@ db.define_table('tatami',
 db.define_table('category',
                Field('name', label = T('name'), requires = IS_UPPER()),
                Field('tournament_id',db.tournament, label = T('tournament')),
+               Field('age_min','integer',label=T('age_min')),
+               Field('age_max','integer',label=T('age_max')),
                format = "%(name)s",
                )
+               
+def calculate_age(birth):
+    import datetime
+    diff = (datetime.date.today() - birth).days
+    years = int(diff/365)
+    return years               
+               
+
+def set_category( birth_date_ ):
+    age = calculate_age(birth_date_)
+    category_id = db( (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
+    return category_id               
 db.define_table('athlete',
                Field('tournament_id',db.tournament, label = T('tournament')),
-               Field('photo','upload',requires=IS_IMAGE()),
+               Field('photo','upload',requires=IS_NULL_OR(IS_IMAGE())),
                Field('identity_number','string', label = T('identity_number'),requires=IS_NOT_EMPTY() ),
-               Field('gender', label = T('gender'), requires=IS_IN_SET(['M', 'F'])),
+               Field('gender_id', db.gender,label = T('gender')),
                Field('name', label = T('name') ,requires = IS_UPPER()),
+               Field('grade_id',db.grade, label = T('grade') , requires = IS_IN_DB(db, 'grade.id', db.grade._format,orderby=db.grade.id)) ,
                Field('birth_date','date', label = T('birth_date'), requires = IS_DATE(format = '%d/%m/%Y')),
-               Field('age', 'integer',label = T('age')),
+               Field('age', 'integer',label = T('age'), compute = lambda r: calculate_age(r['birth_date'])  ),
                Field('dojo_id',db.dojo, label = T('dojo')),
-               Field('category_id',db.category, label = T('category'))                            
+               Field('category_id',db.category, compute = lambda r: set_category(r['birth_date']), )
+               
                )
+
+
 
 db.define_table('fight',
                Field('tournament_id',db.tournament, label = T('tournament_id')),
+               Field('phase','integer', label = T('phase')),
+               Field('fight_num','integer',label = T('fight_num')),
                Field('tatami_id',db.tatami, label = T('tatami')),
                Field('athlete_blue_id','integer', label = T('athlete_blue'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
                Field('athlete_red_id','integer', label = T('athlete_red'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
@@ -188,10 +220,13 @@ db.define_table('fight',
                Field('red_score','integer', label = T('red_score')),
                Field('blue_score','integer', label = T('blue_score')),
                Field('start_date','datetime', label = T('start_date')),
-               Field('finished','boolean', label = T('finished')),
-               Field('phase','integer', label = T('phase')),
+               Field('finished','boolean', label = T('finished')),              
                Field('referee_id','integer', label = T('referee')),
-               Field('category_id',db.category)
+               Field('category_id',db.category, label = T('category')   ) ,
+               Field('gender_id',db.category, label = T('gender')   ) ,
+               Field('grade_id',db.category, label = T('grade')   ) ,
+
+               
                
                )
 
@@ -230,6 +265,22 @@ def auto_update_membership(set_,field_): # set object represent  (db.table.id==1
 db.auth_user._after_insert.append(lambda field,id: auto_create_membership(field,id))
 db.auth_user._before_update.append(lambda set_, field_: auto_update_membership(set_, field_))
 
+
+
+
+"""
+def auto_create_athlete_set_category(field_,id_):
+
+    age = calculate_age(field_['birth_date'])
+    category_id = db( (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
+    db(db.athlete.id==id_).update(category_id=category_id)
+    
+def auto_update_athlete_set_category( set_, field_): # set object represent  (db.table.id==1)
+    pass
+           
+db.athlete._after_insert.append(lambda field,id: auto_create_athlete_set_category(field,id))
+db.athlete._before_update.append(lambda set_, field_: auto_update_athlete_set_category(set_, field_))
+"""
 #db.auth_user.group
 
 T.force('es-es')
@@ -245,5 +296,27 @@ def init_data():
                                'last_name' : 'admin', 
                                'email' : 'admin@karateapp.com', 
                                'password' : db.auth_user.password.validate('1q2w3e.')[0]}])
-   
+  if db(db.grade.id>0).isempty():
+    db.grade.insert(name="9° kyu")
+    db.grade.insert(name="8° kyu")
+    db.grade.insert(name="7° kyu")
+    db.grade.insert(name="6° kyu")
+    db.grade.insert(name="5° kyu")
+    db.grade.insert(name="4° kyu")
+    db.grade.insert(name="3° kyu")
+    db.grade.insert(name="2° kyu")
+    db.grade.insert(name="1° kyu")
+    db.grade.insert(name="1° dan")    
+    db.grade.insert(name="2° dan")
+    db.grade.insert(name="3° dan")
+    db.grade.insert(name="4° dan")
+    db.grade.insert(name="5° dan")      
+  if db(db.category.id>0).isempty():     
+    db.category.insert(name='INFANTIL+4',age_max=5,age_min=4)
+    db.category.insert(name='INFANTIL+6',age_max=8,age_min=6)
+    db.category.insert(name='INFANTIL+9',age_max=10,age_min=9)
+    db.category.insert(name='INFANTIL+11',age_max=12,age_min=11)
+    db.category.insert(name='INFANTIL+13',age_max=15,age_min=13)
+    db.category.insert(name='JUNIOR+16',age_max=18,age_min=16)
+    db.category.insert(name='MASTER+19',age_max=99,age_min=19)
 init_data()

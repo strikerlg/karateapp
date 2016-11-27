@@ -1,0 +1,105 @@
+{{extend 'layout.html'}}
+<style>
+.modal-content {
+    -webkit-box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    /*box-shadow: 0 5px 15px rgba(0,0,0,0.5);*/
+    background-color: #000;
+}  
+h1, .h1 {
+    font-size: 35px;
+    color: #fff;
+    text-align: center;
+} 
+h2, .h2 {
+    font-size: 30px;
+    color: #fff;
+}
+body {
+    background-color:#000;
+    padding-top:0px;
+    padding-bottom;0px;
+    }
+th,td {
+    text-align: center;
+    color: #fff;
+    font-size: 30px;
+}
+</style>
+ <h1>       {{= IMG( _width="70px",_heigth="70px",_src= URL('static', 'images/logo.jpg'),_alt="de" , _id="img_win_photo") }}MEDALLERO -  OPEN VENEZUELA  {{= IMG( _width="70px",_heigth="70px",_src= URL('static', 'images/logo.jpg'),_alt="de" , _id="img_win_photo") }}</h1>
+
+
+
+<table class="table">
+<thead>
+<tr>
+    
+    <td>
+        <th rowspan="2">#</th>
+        <th rowspan="2">DOJO</th>
+        <th rowspan="2">VICTORIAS</th>
+        <th colspan="3">MEDALLAS</th>
+    </td>
+    
+</tr>
+</thead>
+
+<tr>
+    
+    <td>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>ORO</th>
+        <th>PLATA</th>
+        <th>BRONCE</th>
+
+    </td>
+    
+</tr>
+<tbody>
+<tr>
+    
+    <td>
+        <td>1</td>
+        <td>ESCUELA 1</td>
+
+        <td>50 (50%)</td>
+        <td>25</td>
+        <td>12</td>
+        <td>13</td>
+    </td>
+    
+</tr>
+
+<tr>
+    
+    <td>
+        <td>2</td>
+        <td>ESCUELA 2</td>
+        <td>50 (50%)</td>
+        <td>25</td>
+        <td>12</td>
+        <td>13</td>        
+    </td>
+    
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+<script>$( document ).ready(function() {
+    nav= $('nav').hide();
+    var foot = $('footer');
+    foot= $('footer').hide();
+    body= $('body');
+    body.css('background','black');
+    social=$('#socialdrawer');
+    social.hide();
+    fight.print_names();
+    });
+</script>
+

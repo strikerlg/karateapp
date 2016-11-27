@@ -21,6 +21,10 @@ div.jQBracket .team {
     var minimalData = {
     teams : {{ data = [ [rs['blue'],rs['red']] for rs in fights  ] }} {{response.write(json.dumps(data),escape=False)}},
     results : [
+    {{ for phase in xrange(max_phase): }}
+    {{ data = [ [ rs['blue'],rs['red'] ] for rs in results if  rs['phase']==phase+1  ] }} {{response.write(json.dumps(data),escape=False) if len(data)>0 else ''}},
+
+    {{pass }}
     //       [[1,2], [3,4]],       /* first round */   /* first round */
    /* second round */
     ]

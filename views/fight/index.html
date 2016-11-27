@@ -2,12 +2,32 @@
 
 <h1>{{=T('fights')}}</h1>
 
-
+{{=nu_phase_default}}d
+{{=max_phase}}d
 {{stractive=''}}
+
+
+ <ul class="nav nav-tabs" role="tablist">
+    {{for gender in genders:}}
+    {{stractive =' class="active" ' if int(gender.id)==int(gender_default) else ' ' }}
+    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('fight','index',vars=dict(gender_default=gender.id))}}" aria-controls="home" role="tab" ><strong>{{=gender.name}}</strong></a></li>
+    {{pass}}
+</ul>
+
  <ul class="nav nav-tabs" role="tablist">
     {{for cat in categories:}}
     {{stractive =' class="active" ' if int(cat.id)==int(cat_id) else ' ' }}
-    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('fight','index',vars=dict(category_id=cat.id))}}" aria-controls="home" role="tab" ><strong>{{=cat.name}}</strong></a></li>
+    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('fight','index',vars=dict(category_id=cat.id, gender_default = gender_default))}}" aria-controls="home" role="tab" ><strong>{{=cat.name}}</strong></a></li>
+    {{pass}}
+</ul>
+
+ <ul class="nav nav-tabs" role="tablist">
+    {{for nu_phase in xrange(int(max_phase)):}}
+    {{stractive =' class="active" ' if nu_phase+1==int(nu_phase_default) else ' ' }}
+    
+    {{title = 'Semi Final' if max_phase-1 == nu_phase+1 else nu_phase+1}}
+    {{title = 'Final' if max_phase == nu_phase+1 else title}}
+    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('fight','index',vars=dict(gender_default=gender_default, category_id=cat_id, nu_phase = nu_phase+1))}}" aria-controls="home" role="tab" ><strong>{{=title}}</strong></a></li>
     {{pass}}
 </ul>
 {{=grid}}

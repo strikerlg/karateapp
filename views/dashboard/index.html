@@ -10,6 +10,12 @@ h2, .h2 {
     font-size: 30px;
     color: #fff;
 }
+body {
+    background-color:#000;
+    padding-top:0px;
+    padding-bottom;0px;
+    }
+
 #lbl_winner {
 	
 	font-size:32px;
@@ -90,11 +96,6 @@ text-align:center;
     //visibility:hidden;
     //display:none;
 }
-body {
-    background-color:#000;
-    padding-top:0px;
-    padding-bottom;0px;
-    }
 
 .fault_red {
 
@@ -203,7 +204,7 @@ th,td {
           <td><div id="btn_cat2_red_4" class="fault_red"> </div></td>
       </tr>            
   </table>
-  <img src="{{=URL('static','images/logo.jpg')}}" width="150x" alt="..." class="img-circle"> 
+  <img id="img_logo" src="{{=URL('static','images/logo.jpg')}}" width="150x" alt="..." class="img-circle"> 
 
   </div>
 
@@ -217,14 +218,6 @@ th,td {
   
   </div>
 </div>
-
-
-
-
-
-
-
-
 
 <div class="row">
   <div class="col-md-6" style="text-align:center">
@@ -275,13 +268,13 @@ th,td {
 
 
 <div class="row">
-  <div class="col-md-4" style="text-align:center"><div id="label_tatami" >{{=record.fight.tatami_id}}</div></div>
+  <div class="col-md-4" style="text-align:center"><div id="label_tatami" >{{=tatami_name}}</div></div>
   <div class="col-md-4" style="text-align:center">    <div id="label_tournament" >OPEN  DE VENEZUELA</div> </div>
-  <div class="col-md-4" style="text-align:center"><div id="label_category" >{{=record.fight.category_id}}</div></div>
+  <div class="col-md-4" style="text-align:center"><div id="label_category" >{{=category_name}}</div></div>
 </div>
 
 
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-lg">Large modal</button>
+
 
 <div id="anuncio" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
   <div class="modal-dialog modal-lg" role="document">
@@ -309,7 +302,7 @@ th,td {
 			 <div> {{= IMG( _width="50px",_heigth="50px",_src= URL('default', 'download', args=[record.athlete_blue.photo]),_alt="de", _id="img_blue_photo" ) }}</div>
 		</td>
 		<td>
-		{{= IMG( _width="200px",_heigth="200px",_src= URL('default', 'download', args=[record.athlete_blue.photo]),_alt="de" , _id="img_win_photo") }}	 
+		{{= IMG( _width="200px",_heigth="200px",_src= URL('static', 'images/logo.jpg'),_alt="de" , _id="img_win_photo") }}	 
 		<div id="lbl_winner">GANADOR: </div>
 			
 		</td>
@@ -347,12 +340,7 @@ th,td {
     body.css('background','black');
     social=$('#socialdrawer');
     social.hide();
-     fight.print_names();
-
-
-
-
-
+    fight.print_names();
     });
 </script>
 
@@ -429,6 +417,15 @@ var fight = {
             if (color=='red'){ this.red_score=score; }    ; 
             if (color=='blue'){ this.blue_score=score; }  ;
         } 
+
+        if (this.red_score-this.blue_score>=8){
+            $('#anuncio').modal('toggle');
+            this.set_winner('red');
+        }
+        if (this.blue_score-this.red_score>=8){
+            $('#anuncio').modal('toggle');
+            this.set_winner('blue');
+        }
     },
     toggle_crono: function (){
         
@@ -464,9 +461,9 @@ var fight = {
                         
                         tmp_color = '';
                         if (this.red_score < this.blue_score)
-							tmp_color='blue';
-						else
-							tmp_color='red'
+							             tmp_color='blue';
+					              else
+							             tmp_color='red';
                         $('#anuncio').modal('toggle');
                         this.set_winner(tmp_color);
 					 
@@ -521,7 +518,13 @@ var fight = {
         
 
     },
-    
+ 
+    save: function(){
+        
+            $.post( "save_fight", {data:JSON.stringify(fight)} );   
+        
+    },
+
     sync2db: function(){
         if ( this.protection_active || this.cronometer_active)  {
             $.post( "save_fight_log", {data:JSON.stringify(fight)} );   
@@ -548,7 +551,31 @@ var fight = {
 		}		
 			
 
+    }, 
+    
+    decrement_penalty: function(color, cat){
+		
+		if (color=='blue' && cat==1){
+			if (this.blue_c1>0)
+				this.add_penalty(color,cat,this.blue_c1 -1);
+			
+		}
+		if (color=='blue' && cat==2){
+			if (this.blue_c2>0)
+				this.add_penalty(color,cat,this.blue_c2 -1);
+		}
+		if (color=='red' && cat==1){
+			if (this.red_c1>0)
+				this.add_penalty(color,cat,this.red_c1 -1);
+		}	
+		if (color=='red' && cat==2){
+			if (this.red_c2>0)
+				this.add_penalty(color,cat,this.red_c2 -1);	
+		}		
+			
+
     },    
+       
     add_penalty: function (color,cat,cant){
         
         for (var i=1; i<=4; i++){
@@ -626,21 +653,32 @@ shortcut.add("M",function() {
    fight.add_score('red',-1);
 });
 
-shortcut.add("C",function() {
+shortcut.add("Q",function() {
    fight.inc_penalty('blue',1);
 });
-
-shortcut.add("V",function() {
+shortcut.add("E",function() {
+   fight.decrement_penalty('blue',1);
+});
+shortcut.add("A",function() {
    fight.inc_penalty('blue',2);
 });
-
-shortcut.add("B",function() {
+shortcut.add("D",function() {
+   fight.decrement_penalty('blue',2);
+});
+shortcut.add("P",function() {
    fight.inc_penalty('red',1);
 });
-shortcut.add("N",function() {
-   fight.inc_penalty('red',2);
+
+shortcut.add("I",function() {
+   fight.decrement_penalty('red',1);
 });
 
+shortcut.add("L",function() {
+   fight.inc_penalty('red',2);
+});
+shortcut.add("J",function() {
+   fight.decrement_penalty('red',2);
+});
 shortcut.add("space",function() {
    fight.toggle_crono();
 
@@ -648,6 +686,9 @@ shortcut.add("space",function() {
 
 
 
+$( "#btn_save" ).click(function() {
+   fight.save();
+});
 
 $( "#btn_blue1" ).click(function() {
    fight.add_score('blue',1);
@@ -732,6 +773,12 @@ $( "#btn_set_winner_blue" ).click(function() {
     fight.set_winner('blue');
 });
 
+$( "#img_logo" ).click(function() {
+    $('#anuncio').modal('toggle');
+});
+
+
+
 
 
 $( "#btn_redprotection" ).click(function() {
@@ -772,7 +819,7 @@ var m = setInterval('fight.cronometer()', 1000);
 
 var m1 = setInterval('fight.protection()', 1000);
 
-var m3 = setInterval('fight.sync2db()', 500);
+//var m3 = setInterval('fight.sync2db()', 500);
 
 //]]>
 </script>

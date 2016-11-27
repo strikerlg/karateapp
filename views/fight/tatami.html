@@ -1,0 +1,19 @@
+{{extend 'layout.html'}}
+
+<h1>{{=T('fights by tatami')}}</h1>
+
+{{stractive=''}}
+
+
+ <ul class="nav nav-tabs" role="tablist">
+    {{stractive =' class="active" ' if int(tatami_default)==0 else ' ' }}
+    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('fight','tatami',vars=dict(tatami_id=0))}}" aria-controls="home" role="tab" ><strong>Sin Tatami</strong></a></li>
+    {{for tatami in tatamis:}}
+    {{stractive =' class="active" ' if int(tatami.id)==int(tatami_default) else ' ' }}
+    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('fight','tatami',vars=dict(tatami_id=tatami.id))}}" aria-controls="home" role="tab" ><strong>{{=tatami.name}}</strong></a></li>
+    {{pass}}
+</ul>
+
+
+{{=grid}}
+

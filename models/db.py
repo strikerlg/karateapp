@@ -157,7 +157,7 @@ db.define_table('states',
 db.define_table('tournament',
                Field('name', label = T('name'),requires=[IS_NOT_EMPTY(), IS_UPPER()]),
                Field('description', label = T('descriptions'),requires=IS_NOT_EMPTY()),
-               Field('date_start','datetime', label = T('date_start')),
+               Field('date_start','datetime', label = T('date_start'), requires=IS_DATE(format = '%d/%m/%Y')),
                Field('bracket','boolean',writable=False,default=False),
                format = "%(name)s",
                )
@@ -177,11 +177,24 @@ db.define_table('tatami',
 db.define_table('category',
                Field('name', label = T('name'), requires = IS_UPPER()),
                Field('tournament_id',db.tournament, label = T('tournament')),
+               Field('gender_id',db.gender,label=T('gender')),
                Field('age_min','integer',label=T('age_min')),
                Field('age_max','integer',label=T('age_max')),
                format = "%(name)s",
+               #format = lambda r: "%s-%s" % (db( (db.gender.id==r.gender_id) ).select(db.gender.name).first().name,
+               #                             r.name )
                )
-               
+db.define_table('subcategory',
+               Field('name', label = T('name'), requires = IS_UPPER()),
+               Field('category_id',db.category, label = T('category')),
+               #Field('gender_id',db.gender,label=T('gender')),
+               Field('grade_min_id',db.grade,label=T('grade_min')),
+               Field('grade_max_id',db.grade,label=T('grade_max')),
+               format = "%(name)s",
+               #format = lambda r: "%s-%s-%s" % (db( (db.category.id==r.category_id) & (db.category.gender_id==db.gender.id) ).select(db.gender.name).first().name,
+               #                             db(db.category.id==r.category_id).select(db.category.name).first().name, 
+               #                             r.name )
+               )               
 def calculate_age(birth):
     import datetime
     diff = (datetime.date.today() - birth).days
@@ -189,12 +202,22 @@ def calculate_age(birth):
     return years               
                
 
-def set_category( birth_date_ ):
+def set_category( birth_date_ , gender_):
     age = calculate_age(birth_date_)
-    category_id = db( (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
-    return category_id               
+    category_id = db( (db.category.gender_id== gender_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
+    return category_id 
+
+def set_subcategory( birth_date_ , gender_, grade_id):
+    age = calculate_age(birth_date_)
+    category_id = db( (db.category.gender_id== gender_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age)
+                    ).select(db.category.id).first().as_dict()['id']
+    subcategory_id = db (  (db.subcategory.category_id==category_id) & (db.subcategory.grade_max_id>=grade_id) & (db.subcategory.grade_min_id<=grade_id)
+                    ).select(db.subcategory.id).first().as_dict()['id']
+
+    return subcategory_id  
+
 db.define_table('athlete',
-               Field('tournament_id',db.tournament, label = T('tournament')),
+               Field('tournament_id',db.tournament, label = T('tournament'),default=1),
                Field('photo','upload',requires=IS_NULL_OR(IS_IMAGE())),
                Field('identity_number','string', label = T('identity_number'),requires=IS_NOT_EMPTY() ),
                Field('gender_id', db.gender,label = T('gender')),
@@ -203,7 +226,8 @@ db.define_table('athlete',
                Field('birth_date','date', label = T('birth_date'), requires = IS_DATE(format = '%d/%m/%Y')),
                Field('age', 'integer',label = T('age'), compute = lambda r: calculate_age(r['birth_date'])  ),
                Field('dojo_id',db.dojo, label = T('dojo')),
-               Field('category_id',db.category, compute = lambda r: set_category(r['birth_date']), )
+               Field('category_id',db.category, compute = lambda r: set_category(r['birth_date'],r['gender_id']), ),
+               Field('subcategory_id',db.subcategory, compute = lambda r: set_subcategory(r['birth_date'],r['gender_id'] ,r['grade_id']), ),
                
                )
 
@@ -211,21 +235,24 @@ db.define_table('athlete',
 
 db.define_table('fight',
                Field('tournament_id',db.tournament, label = T('tournament_id')),
-               Field('phase','integer', label = T('phase')),
-               Field('fight_num','integer',label = T('fight_num')),
+               Field('phase','integer', label = T('phase'),writable =False ),
+               Field('fight_num','integer',label = T('fight_num'), writable =False ),
                Field('tatami_id',db.tatami, label = T('tatami')),
                Field('athlete_blue_id','integer', label = T('athlete_blue'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
                Field('athlete_red_id','integer', label = T('athlete_red'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
                Field('athlete_win_id','integer', label = T('athlete_win'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
-               Field('red_score','integer', label = T('red_score')),
-               Field('blue_score','integer', label = T('blue_score')),
-               Field('start_date','datetime', label = T('start_date')),
-               Field('finished','boolean', label = T('finished')),              
-               Field('referee_id','integer', label = T('referee')),
-               Field('category_id',db.category, label = T('category')   ) ,
-               Field('gender_id',db.category, label = T('gender')   ) ,
-               Field('grade_id',db.category, label = T('grade')   ) ,
-
+               Field('red_score','integer', label = T('red_score'), writable =False ),
+               Field('blue_score','integer', label = T('blue_score'), writable =False ),
+               
+               Field('finished','boolean', label = T('finished'), writable =False ),              
+               Field('referee_id','integer', label = T('referee'), writable =False ),
+               Field('category_id',db.category, label = T('category') , writable =False  ) ,
+               Field('gender_id',db.gender, label = T('gender')  , writable =False  ) ,
+               Field('subcategory_id',db.subcategory, label = T('subcategory') , writable =False   ) ,
+               Field('blue_c1','integer', label = T('blue_penalty_c1') , writable =False   ) ,
+               Field('blue_c2','integer', label = T('blue_penalty_c2') , writable =False   ) ,
+               Field('red_c1','integer', label = T('red_penalty_c1') , writable =False   ) ,
+               Field('red_c2','integer', label = T('red_penalty_c2') , writable =False   ) ,
                
                
                )
@@ -286,6 +313,7 @@ db.athlete._before_update.append(lambda set_, field_: auto_update_athlete_set_ca
 T.force('es-es')
 
 def init_data():
+  k10,k9,k8,k7,k6,k5,k4,k3,k2,k1,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10 = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
   if db(db.auth_group.id>0).isempty():
     admin_id= db.auth_group.insert(role = 'admin', description= 'Administrator')
     db.auth_group.insert(role = 'referee', description= 'Referee')
@@ -297,26 +325,171 @@ def init_data():
                                'email' : 'admin@karateapp.com', 
                                'password' : db.auth_user.password.validate('1q2w3e.')[0]}])
   if db(db.grade.id>0).isempty():
-    db.grade.insert(name="9° kyu")
-    db.grade.insert(name="8° kyu")
-    db.grade.insert(name="7° kyu")
-    db.grade.insert(name="6° kyu")
-    db.grade.insert(name="5° kyu")
-    db.grade.insert(name="4° kyu")
-    db.grade.insert(name="3° kyu")
-    db.grade.insert(name="2° kyu")
-    db.grade.insert(name="1° kyu")
-    db.grade.insert(name="1° dan")    
-    db.grade.insert(name="2° dan")
-    db.grade.insert(name="3° dan")
-    db.grade.insert(name="4° dan")
-    db.grade.insert(name="5° dan")      
+    k10 = db.grade.insert(name="10° kyu") #1
+    k9 = db.grade.insert(name="9° kyu") #2
+    k8 = db.grade.insert(name="8° kyu") #3
+    k7 = db.grade.insert(name="7° kyu") #4
+    k6 = db.grade.insert(name="6° kyu") #5
+    k5 = db.grade.insert(name="5° kyu") #6
+    k4 = db.grade.insert(name="4° kyu") #7
+    k3 = db.grade.insert(name="3° kyu") #8
+    k2 = db.grade.insert(name="2° kyu") #9
+    k1 = db.grade.insert(name="1° kyu") #10
+    d1 = db.grade.insert(name="1° dan") #11   
+    d2 = db.grade.insert(name="2° dan") #12
+    d3 = db.grade.insert(name="3° dan") #13
+    d4 = db.grade.insert(name="4° dan") #14
+    d5 = db.grade.insert(name="5° dan") #15     
+    d6 = db.grade.insert(name="6° dan") #16
+    d7 = db.grade.insert(name="7° dan") #17
+    d8 = db.grade.insert(name="8° dan") #18
+    d9 = db.grade.insert(name="9° dan") #19
+    d10 = db.grade.insert(name="10° dan") #20
+
+
   if db(db.category.id>0).isempty():     
-    db.category.insert(name='INFANTIL+4',age_max=5,age_min=4)
-    db.category.insert(name='INFANTIL+6',age_max=8,age_min=6)
-    db.category.insert(name='INFANTIL+9',age_max=10,age_min=9)
-    db.category.insert(name='INFANTIL+11',age_max=12,age_min=11)
-    db.category.insert(name='INFANTIL+13',age_max=15,age_min=13)
-    db.category.insert(name='JUNIOR+16',age_max=18,age_min=16)
-    db.category.insert(name='MASTER+19',age_max=99,age_min=19)
+    tmp_id = db.category.insert(name='04 AÑOS',age_max=4,age_min=4,gender_id=1)
+    db.subcategory.insert(name="Todos",category_id=tmp_id,grade_min_id =k10, grade_max_id=d10)
+
+    tmp_id = db.category.insert(name='05 AÑOS',age_max=5,age_min=5,gender_id=1 )
+    db.subcategory.insert(name="Todos",category_id=tmp_id,grade_min_id =k10, grade_max_id=d10)
+
+    tmp_id = db.category.insert(name='06 a 07 AÑOS',age_max=07,age_min=06,gender_id=1 )
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id =k10, grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to Kyu +  ",category_id=tmp_id,grade_min_id =k6, grade_max_id=d10)
+
+    tmp_id = db.category.insert(name='08 a 09 AÑOS',age_max=9,age_min=8,gender_id=1)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu  ",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+    db.subcategory.insert(name="3er Kyu +  ",category_id=tmp_id,grade_min_id =k3, grade_max_id=d10)
+
+    tmp_id = db.category.insert(name='10 a 11 AÑOS',age_max=11,age_min=10,gender_id=1)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu  ",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+    db.subcategory.insert(name="3er Kyu +  ",category_id=tmp_id,grade_min_id =k3, grade_max_id=d10)
+
+    tmp_id = db.category.insert(name='12 a 13 AÑOS',age_max=13,age_min=12,gender_id=1)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+
+    tmp_id = db.category.insert(name='14 a 15 AÑOS',age_max=15,age_min=14,gender_id=1)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+
+    tmp_id = db.category.insert(name='16 a 17 AÑOS',age_max=17,age_min=16,gender_id=1)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+
+    tmp_id = db.category.insert(name='18 a 34 AÑOS',age_max=34,age_min=18,gender_id=1)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+
+    tmp_id = db.category.insert(name='35 a 40 AÑOS',age_max=40,age_min=35,gender_id=1)
+    db.subcategory.insert(name="10mo-7no Kyu",category_id=tmp_id,grade_min_id =k10, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+
+    tmp_id = db.category.insert(name='41 a 50 AÑOS',age_max=50,age_min=41,gender_id=1)
+    db.subcategory.insert(name="10mo-7no Kyu",category_id=tmp_id,grade_min_id =k10, grade_max_id=k7)
+    db.subcategory.insert(name="6to Kyu +",category_id=tmp_id,grade_min_id =k6, grade_max_id=d10)    
+    
+    tmp_id = db.category.insert(name='mas 50 AÑOS',age_max=99,age_min=51,gender_id=1)
+    db.subcategory.insert(name="10mo-7no Kyu",category_id=tmp_id,grade_min_id =k10, grade_max_id=k7)
+    db.subcategory.insert(name="6to Kyu +",category_id=tmp_id,grade_min_id =k6, grade_max_id=d10)  
+
+    #CARGA DE FEMENINO / LOAD WOMEN DATA
+    tmp_id = db.category.insert(name='04 a 05 AÑOS',age_max=5,age_min=4,gender_id=2)
+    db.subcategory.insert(name="Todos",category_id=tmp_id,grade_min_id =k10, grade_max_id=d10)
+
+
+    tmp_id = db.category.insert(name='06 a 07 AÑOS',age_max=07,age_min=06,gender_id=2 )
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id =k10, grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to Kyu +  ",category_id=tmp_id,grade_min_id =k6, grade_max_id=d10)
+
+    tmp_id = db.category.insert(name='08 a 09 AÑOS',age_max=9,age_min=8,gender_id=2)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu  ",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+    db.subcategory.insert(name="3er Kyu +  ",category_id=tmp_id,grade_min_id =k3, grade_max_id=d10)
+
+    tmp_id = db.category.insert(name='10 a 11 AÑOS',age_max=11,age_min=10,gender_id=2)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu  ",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+    db.subcategory.insert(name="3er Kyu +  ",category_id=tmp_id,grade_min_id =k3, grade_max_id=d10)
+
+    tmp_id = db.category.insert(name='12 a 13 AÑOS',age_max=13,age_min=12,gender_id=2)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+
+    tmp_id = db.category.insert(name='14 a 15 AÑOS',age_max=15,age_min=14,gender_id=2)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+
+    tmp_id = db.category.insert(name='16 a 17 AÑOS',age_max=17,age_min=16,gender_id=2)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+
+    tmp_id = db.category.insert(name='18 a 29 AÑOS',age_max=29,age_min=18,gender_id=2)
+    db.subcategory.insert(name="10mo-9no Kyu",category_id=tmp_id,grade_min_id = k10 , grade_max_id=k9)
+    db.subcategory.insert(name="8vo-7mo Kyu",category_id=tmp_id,grade_min_id =k8, grade_max_id=k7)
+    db.subcategory.insert(name="6to-4to Kyu",category_id=tmp_id,grade_min_id =k6, grade_max_id=k4)
+
+    tmp_id = db.category.insert(name='30 a 40 AÑOS',age_max=40,age_min=30,gender_id=2)
+    db.subcategory.insert(name="10mo-7no Kyu",category_id=tmp_id,grade_min_id =k10, grade_max_id=k7)
+    db.subcategory.insert(name="6to Kyu +",category_id=tmp_id,grade_min_id =k6, grade_max_id=d10) 
+
+    tmp_id = db.category.insert(name='mas 40 AÑOS',age_max=99,age_min=40,gender_id=2)
+    db.subcategory.insert(name="10mo-7no Kyu",category_id=tmp_id,grade_min_id =k10, grade_max_id=k7)
+    db.subcategory.insert(name="6to Kyu +",category_id=tmp_id,grade_min_id =k6, grade_max_id=d10) 
+
+  if db(db.gender.id>0).isempty():
+    db.gender.insert(name="Masculino")
+    db.gender.insert(name="Femenino")
+  if db(db.tatami.id>0).isempty():
+    db.tatami.insert(name="Cancha 1")
+    db.tatami.insert(name="Cancha 2")    
+    db.tatami.insert(name="Cancha 3")
+    db.tatami.insert(name="Cancha 4") 
+    db.tatami.insert(name="Cancha 5")
+    db.tatami.insert(name="Cancha 6")         
+    db.tatami.insert(name="Cancha 7")
+    db.tatami.insert(name="Cancha 8") 
+    db.tatami.insert(name="Cancha 9")
+    db.tatami.insert(name="Cancha 10")
+    db.tatami.insert(name="Cancha 11")
+    db.tatami.insert(name="Cancha 12") 
+    db.tatami.insert(name="Cancha 13")
+    db.tatami.insert(name="Cancha 14")
+    db.tatami.insert(name="Cancha 15")
+    db.tatami.insert(name="Cancha 16")                       
 init_data()
+
+
+"""
+truncate grade cascade;
+ALTER SEQUENCE grade_id_seq MINVALUE 0;
+SELECT setval('public.grade_id_seq', 0, true);
+
+ALTER SEQUENCE fight_id_seq MINVALUE 0;
+SELECT setval('public.fight_id_seq', 0, true);
+
+truncate category cascade;
+ALTER SEQUENCE category_id_seq MINVALUE 0;
+SELECT setval('public.category_id_seq', 0, true);
+
+ALTER SEQUENCE subcategory_id_seq MINVALUE 0;
+ALTER SEQUENCE subcategory_id_seq MINVALUE 0;
+SELECT setval('public.subcategory_id_seq', 0, true);
+
+"""

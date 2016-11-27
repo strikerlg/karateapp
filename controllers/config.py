@@ -5,7 +5,7 @@ def index():
     return dict(grid = grid)
 
 def category(): 
-    grid = SQLFORM.grid(db.category)
+    grid = SQLFORM.smartgrid(db.category)
     return dict(grid = grid)
 
 

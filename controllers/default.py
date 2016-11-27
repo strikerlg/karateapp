@@ -17,10 +17,16 @@ def index():
 def matchs():
     Athlete_red  =  db.athlete.with_alias('athlete_red')
     Athlete_blue  =  db.athlete.with_alias('athlete_blue')
-    matchs = db(  db.fight.id>0).select( db.fight.ALL, Athlete_red.ALL, Athlete_blue.ALL,
+    matchs = db(  (db.fight.id>0 ) & (db.fight.finished == None)  
+        & ( (db.fight.athlete_red_id != None) |  (db.fight.athlete_blue_id != None) )
+        & (db.fight.athlete_win_id == None) 
+        ) .select( db.fight.ALL, Athlete_red.ALL, Athlete_blue.ALL,db.tatami.ALL,db.category.ALL, db.gender.ALL,
                                                             left=(  Athlete_red.on(Athlete_red.id == db.fight.athlete_red_id),
-                                                                      Athlete_blue.on(Athlete_blue.id == db.fight.athlete_blue_id )    
-                                                            ))
+                                                                      Athlete_blue.on(Athlete_blue.id == db.fight.athlete_blue_id ),
+                                                                    db.tatami.on(  db.fight.tatami_id == db.tatami.id ), 
+                                                                    db.category.on(  db.fight.category_id == db.category.id ),   
+                                                                    db.gender.on(  db.fight.gender_id == db.gender.id ), 
+                                                            ),orderby=(db.fight.phase,db.fight.id))
     return dict(matchs=matchs)
     
 def users():

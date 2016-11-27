@@ -11,10 +11,18 @@
 <h1>{{=T('Athletes')}}</h1>
 
 {{stractive=''}}
+
+ <ul class="nav nav-tabs" role="tablist">
+    {{for gen in gender:}}
+    {{stractive =' class="active" ' if int(gen.id)==int(gender_default) else ' ' }}
+    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('athlete','index',vars=dict(gender_default=gen.id))}}" aria-controls="home" role="tab" ><strong>{{=gen.name}}</strong></a></li>
+    {{pass}}
+</ul>
+
  <ul class="nav nav-tabs" role="tablist">
     {{for cat in categories:}}
     {{stractive =' class="active" ' if int(cat.id)==int(cat_id) else ' ' }}
-    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('athlete','index',vars=dict(category_id=cat.id))}}" aria-controls="home" role="tab" ><strong>{{=cat.name}}</strong></a></li>
+    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('athlete','index',vars=dict(category_id=cat.id, gender_default=gender_default))}}" aria-controls="home" role="tab" ><strong>{{=cat.name}}</strong></a></li>
     {{pass}}
 </ul>
 

@@ -4,6 +4,9 @@
     <tr>
         <th>{{=T('id')}}</th>
         <th>{{=T('Athletes')}}</th>
+        <th>{{=T('Phase')}}</th>
+       
+        <th>{{=T('Category')}}</th>
         <th>{{=T('Tatami')}}</th>
         <th>&nbsp;</th>
         
@@ -13,9 +16,13 @@
         <td>{{=record.fight.id}}</td>
         <td>{{=record.athlete_blue.name}} {{=IMG( _width="50px",_heigth="50px",_src= URL('default', 'download', args=[record.athlete_blue.photo]),_alt="",_class="img-rounded" )}} <strong> 
                   vs  {{=IMG( _width="50px",_heigth="50px",_src= URL('default', 'download', args=[record.athlete_red.photo]),_alt="",_class="img-rounded" )}}</strong> {{=record.athlete_red.name}} </td>
-        <td></td>
+        <td>{{=record.fight.phase}}</td>
+    
+        <td>{{=record.gender.name}} - {{=record.category.name}}</td>
+        <td>{{=record.tatami.name}}</td>
+        
         <td><a type="button" target="_blank"  href="{{=URL('dashboard','index',vars=dict(match_id=record.fight.id)) }}" class="btn btn-primary btn-xs">Tablero de Control</a>
-            <a type="button" target="_blank"  href="{{=URL('dashboard','projection')}}" class="btn btn-primary btn-xs">Monitor</a>
+            
         </td>
         
     </tr>

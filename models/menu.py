@@ -5,7 +5,7 @@
 # Customize your APP title, subtitle and menus here
 # ----------------------------------------------------------------------------------------------------------------------
 
-response.logo = A('KarateApps',
+response.logo = A( IMG(_src=URL('static','images/logo.jpg'), _alt='', _width="40px"),
                   _class="navbar-brand", _href=URL('index'),
                   _id="web2py-logo")
 response.title = request.application.replace('_', ' ').title()
@@ -34,7 +34,8 @@ response.menu = [
     (T('Matchs'), False, URL('fight', 'index'), [
         (T('By category'), False, URL('fight', 'index'), []),
         (T('By Brackets'), False, URL('fight', 'bracket'), []),
-        (T('By Date'), False, URL('fight', 'bracket'), []),
+        (T('By Tatami'), False, URL('fight', 'tatami'), []),
+        (T('By Dojo'), False, URL('fight', 'dojo'), []),
 
     ]),
     (T('Configuration'), False, URL('config', 'index'), [
@@ -50,8 +51,19 @@ response.menu = [
         (T('Users'), False, URL('config', 'users'), []), 
         (T('Athletes'), False, URL('athlete', 'index'), []), 
         (T('Generate Matchs'), False, URL('fight', 'generate_matchs'), []), 
-    ])
-  
+    ]),
+
+    (T('Stats'), False, URL('monitor', 'index'), [
+        (T('By Dojo'), False, URL('monitor', 'index'), []),
+        (T('By Dojo '), False, URL('fight', 'bracket'), []),
+        (T('By Tatami'), False, URL('fight', 'tatami'), []),
+
+    ]),
+    (T('Reports'), False, URL('fight', 'index'), [
+        (T('Athletes'), False, URL('report', 'athlete'), []),
+        (T('Matchs'), False, URL('report', 'index'), []),
+
+    ]),
 ]
 
 DEVELOPMENT_MENU = False

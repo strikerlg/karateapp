@@ -92,9 +92,9 @@ def tatami():
          pass      
       txt = db( db.athlete.id == r.athlete_blue_id).select(db.athlete.name).first().as_dict()['name'] if db( db.athlete.id == r.athlete_blue_id).select(db.athlete.name).first() else '..'
       url_photo = db( db.athlete.id == r.athlete_blue_id).select(db.athlete.photo).first().as_dict()['photo'] if db( db.athlete.id == r.athlete_blue_id).select(db.athlete.name).first() else None
-      photo =   IMG( _width="60px",_heigth="60px",_src= URL('default', 'download', args=[url_photo]),_alt=txt )
-      if url_photo is None:
-       photo =   IMG( _width="60px",_heigth="60px",_src= URL('static', 'images/nophoto.jpg', args=[url_photo]),_alt=txt)
+      photo =   IMG( _width="60px",_heigth="60px",_src= URL('default', 'download', args=[url_photo]),_alt='' )
+      if url_photo is None or len(url_photo)<1:
+       photo =   IMG( _width="60px",_heigth="60px",_src= URL('static', 'images/nophoto.jpg', args=[url_photo]),_alt='')
 
       return DIV(photo, txt,BR(),STRONG(dojo),_style="color:#0000ff;") 
 
@@ -109,9 +109,9 @@ def tatami():
       
       txt = db( db.athlete.id == r.athlete_red_id).select(db.athlete.name).first().as_dict()['name'] if db( db.athlete.id == r.athlete_red_id).select(db.athlete.name).first() else '..'
       url_photo = db( db.athlete.id == r.athlete_red_id).select(db.athlete.photo).first().as_dict()['photo'] if db( db.athlete.id == r.athlete_red_id).select(db.athlete.name).first() else None
-      photo = IMG( _width="60px",_heigth="60px",_src= URL('default', 'download', args=[url_photo]),_alt=txt )
-      if url_photo is None:
-       photo =   IMG( _width="60px",_heigth="60px",_src= URL('static', 'images/nophoto.jpg', args=[url_photo]),_alt=txt)
+      photo = IMG( _width="60px",_heigth="60px",_src= URL('default', 'download', args=[url_photo]),_alt='' )
+      if url_photo is None or len(url_photo)<1:
+       photo =   IMG( _width="60px",_heigth="60px",_src= URL('static', 'images/nophoto.jpg', args=[url_photo]),_alt='')
       return DIV(photo, txt,BR(),STRONG(dojo) ,_style="color:#ff0000;")       
     #db.athlete.photo.represent = lambda r,i: IMG( _width="80px",_heigth="80px",_src= URL('default', 'download', args=[i.photo]),_alt="de" )
     db.fight.athlete_blue_id.represent = lambda i,r: get_photo_blue(i,r)
@@ -204,7 +204,7 @@ def generate_matchs():
             phase = 1
             athletes_count = db((db.athlete.gender_id==gender.id  ) & (db.athlete.id>0 ) & (db.athlete.subcategory_id == rscat.subcategory.id) ).count()
             athlete_by_dojo=dict()
-            for athlete in db((db.athlete.gender_id==gender.id  )& (db.athlete.id>0  )& (db.athlete.subcategory_id == rscat.subcategory.id)).select(db.athlete.id, db.athlete.dojo_id):
+            for athlete in db((db.athlete.gender_id==gender.id  )& (db.athlete.id>0  )& (db.athlete.subcategory_id == rscat.subcategory.id)).select(db.athlete.id, db.athlete.dojo_id, orderby='<random>'):
                 if not athlete_by_dojo.has_key(athlete.dojo_id):
                     athlete_by_dojo[ athlete.dojo_id ] = [athlete.id]
                 else:

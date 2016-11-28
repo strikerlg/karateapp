@@ -7,7 +7,20 @@ def index():
 def category(): 
     grid = SQLFORM.smartgrid(db.category)
     return dict(grid = grid)
+def subcategory(): 
+    fields = (
+        
+db.category.gender_id,
+db.subcategory.category_id,
+db.subcategory.name,
+db.subcategory.grade_min_id,    db.subcategory.grade_max_id,
+db.subcategory.weight_min,  db.subcategory.weight_max
 
+
+        )
+    qry = ( (db.subcategory.id>0) & (db.subcategory.category_id==db.category.id) & (db.category.gender_id == db.gender.id)  )
+    grid = SQLFORM.grid(qry, fields = fields)
+    return dict(grid = grid)
 
 def school(): 
     grid = SQLFORM.grid(db.school)

@@ -173,13 +173,18 @@ db.define_table('tatami',
                Field('tournament_id',db.tournament, label = T('tournament')),
                format = "%(name)s",
                )
-
+db.define_table('circuit',
+               Field('name', label = T('name')),
+               #Field('tournament_id',db.tournament, label = T('tournament')),
+               format = "%(name)s",
+               )
 db.define_table('category',
                Field('name', label = T('name'), requires = IS_UPPER()),
                Field('tournament_id',db.tournament, label = T('tournament')),
                Field('gender_id',db.gender,label=T('gender')),
                Field('age_min','integer',label=T('age_min')),
                Field('age_max','integer',label=T('age_max')),
+               Field('circuit_id',db.circuit,label=T('circuit') ),
                format = "%(name)s",
                #format = lambda r: "%s-%s" % (db( (db.gender.id==r.gender_id) ).select(db.gender.name).first().name,
                #                             r.name )
@@ -190,6 +195,8 @@ db.define_table('subcategory',
                #Field('gender_id',db.gender,label=T('gender')),
                Field('grade_min_id',db.grade,label=T('grade_min')),
                Field('grade_max_id',db.grade,label=T('grade_max')),
+               Field('weight_min','integer',label=T('weight_min')),
+               Field('weight_max','integer',label=T('weight_max')),               
                format = "%(name)s",
                #format = lambda r: "%s-%s-%s" % (db( (db.category.id==r.category_id) & (db.category.gender_id==db.gender.id) ).select(db.gender.name).first().name,
                #                             db(db.category.id==r.category_id).select(db.category.name).first().name, 
@@ -202,33 +209,59 @@ def calculate_age(birth):
     return years               
                
 
-def set_category( birth_date_ , gender_):
+def set_category( birth_date_ , gender_, circuit_):
     age = calculate_age(birth_date_)
     category_id = db( (db.category.gender_id== gender_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
+    if circuit_==2:
+        category_id = db( (db.category.gender_id== gender_ ) & (db.category.circuit_id== circuit_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
     return category_id 
 
-def set_subcategory( birth_date_ , gender_, grade_id):
+def set_subcategory( birth_date_ , gender_, grade_id,circuit_, weight_):
+    import logging
+    logger = logging.getLogger(request.application)
+    logger.setLevel(logging.DEBUG)
+    
+    
     age = calculate_age(birth_date_)
-    category_id = db( (db.category.gender_id== gender_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age)
-                    ).select(db.category.id).first().as_dict()['id']
-    subcategory_id = db (  (db.subcategory.category_id==category_id) & (db.subcategory.grade_max_id>=grade_id) & (db.subcategory.grade_min_id<=grade_id)
-                    ).select(db.subcategory.id).first().as_dict()['id']
-
+    logger.debug('CDSM1')
+    logger.debug(circuit_)
+    
+    category_id = None
+    subcategory_id = None
+    if circuit_==2:
+      category_id = db( (db.category.gender_id== gender_ ) & (db.category.circuit_id== circuit_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age)
+                      ).select(db.category.id).first().as_dict()['id']
+      subcategory_id = db (  (db.subcategory.category_id==category_id) & 
+                             (db.subcategory.grade_max_id>=grade_id) & 
+                             (db.subcategory.grade_min_id<=grade_id) &
+                             (db.subcategory.weight_min<=weight_) &
+                             (db.subcategory.weight_max>=weight_) 
+                      ).select(db.subcategory.id).first().as_dict()['id']
+    else:
+      category_id = db( (db.category.gender_id== gender_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age)
+                      ).select(db.category.id).first().as_dict()['id']
+      subcategory_id = db (  (db.subcategory.category_id==category_id) & (db.subcategory.grade_max_id>=grade_id) & (db.subcategory.grade_min_id<=grade_id)
+                      ).select(db.subcategory.id).first().as_dict()['id']
+    logger = logging.getLogger(request.application)
+    logger.setLevel(logging.DEBUG)
+    logger.debug('CDSM3')
+    
     return subcategory_id  
 
 db.define_table('athlete',
                Field('tournament_id',db.tournament, label = T('tournament'),default=1),
                Field('photo','upload',requires=IS_NULL_OR(IS_IMAGE())),
-               Field('identity_number','string', label = T('identity_number'),requires=IS_NOT_EMPTY() ),
+               Field('identity_number','string', label = T('identity_number'),default="NA" ),
                Field('gender_id', db.gender,label = T('gender')),
                Field('name', label = T('name') ,requires = IS_UPPER()),
                Field('grade_id',db.grade, label = T('grade') , requires = IS_IN_DB(db, 'grade.id', db.grade._format,orderby=db.grade.id)) ,
                Field('birth_date','date', label = T('birth_date'), requires = IS_DATE(format = '%d/%m/%Y')),
                Field('age', 'integer',label = T('age'), compute = lambda r: calculate_age(r['birth_date'])  ),
+               Field('weight', 'integer',label = T('weight'), default=0),
                Field('dojo_id',db.dojo, label = T('dojo')),
-               Field('category_id',db.category, compute = lambda r: set_category(r['birth_date'],r['gender_id']), ),
-               Field('subcategory_id',db.subcategory, compute = lambda r: set_subcategory(r['birth_date'],r['gender_id'] ,r['grade_id']), ),
-               
+               Field('circuit_id',db.circuit, label = T('circuit'), default=1),
+               Field('category_id',db.category, compute = lambda r: set_category(r['birth_date'], r['gender_id'], r['circuit_id'])),
+               Field('subcategory_id',db.subcategory, compute = lambda r: set_subcategory( r['birth_date'], r['gender_id'] , r['grade_id'],  r['circuit_id'], r['weight']))
                )
 
 
@@ -313,7 +346,7 @@ db.athlete._before_update.append(lambda set_, field_: auto_update_athlete_set_ca
 T.force('es-es')
 
 def init_data():
-  k10,k9,k8,k7,k6,k5,k4,k3,k2,k1,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10 = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+  k10,k9,k8,k7,k6,k5,k4,k3,k2,k1,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,sdan = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21)
   if db(db.auth_group.id>0).isempty():
     admin_id= db.auth_group.insert(role = 'admin', description= 'Administrator')
     db.auth_group.insert(role = 'referee', description= 'Referee')
@@ -324,6 +357,9 @@ def init_data():
                                'last_name' : 'admin', 
                                'email' : 'admin@karateapp.com', 
                                'password' : db.auth_user.password.validate('1q2w3e.')[0]}])
+  if db(db.circuit.id>0).isempty():
+    db.circuit.insert(name="Normal") #1
+    db.circuit.insert(name="Dorado") #2
   if db(db.grade.id>0).isempty():
     k10 = db.grade.insert(name="10° kyu") #1
     k9 = db.grade.insert(name="9° kyu") #2
@@ -453,6 +489,11 @@ def init_data():
     db.subcategory.insert(name="10mo-7no Kyu",category_id=tmp_id,grade_min_id =k10, grade_max_id=k7)
     db.subcategory.insert(name="6to Kyu +",category_id=tmp_id,grade_min_id =k6, grade_max_id=d10) 
 
+
+    tmp_id = db.category.insert(name='Dorado 12 a 13 Años',age_max=13,age_min=12,gender_id=2)
+    db.subcategory.insert(name="3er Kyu + (-45kg)",category_id=tmp_id,grade_min_id =k6, grade_max_id=d10)
+    db.subcategory.insert(name="3er Kyu + (+45kg)",category_id=tmp_id,grade_min_id =k6, grade_max_id=d10)      
+
   if db(db.gender.id>0).isempty():
     db.gender.insert(name="Masculino")
     db.gender.insert(name="Femenino")
@@ -472,7 +513,36 @@ def init_data():
     db.tatami.insert(name="Cancha 13")
     db.tatami.insert(name="Cancha 14")
     db.tatami.insert(name="Cancha 15")
-    db.tatami.insert(name="Cancha 16")                       
+    db.tatami.insert(name="Cancha 16")        
+  if db(db.states.id>0).isempty():
+    db.states.insert(name="DISTRITO CAPITAL")
+    
+    db.states.insert(name="APURE")
+    db.states.insert(name="ARAGUA")   
+    db.states.insert(name="BARINAS")
+  
+    db.states.insert(name="BOLIVAR")
+    db.states.insert(name="CARABOBO")   
+
+    db.states.insert(name="COJEDES")
+  
+    db.states.insert(name="FALCON")
+    db.states.insert(name="GUARICO")   
+    db.states.insert(name="LARA")
+    db.states.insert(name="MERIDA")   
+    db.states.insert(name="MIRANDA")
+    db.states.insert(name="MONAGAS")   
+    db.states.insert(name="NUEVA ESPARTA")
+    db.states.insert(name="PORTUGUESA")   
+    db.states.insert(name="SUCRE")
+    db.states.insert(name="TACHIRA")   
+    db.states.insert(name="TRUJILLO")
+    db.states.insert(name="YARACUY")
+    db.states.insert(name="ZULIA")   
+    db.states.insert(name="AMAZONAS") 
+    db.states.insert(name="DELTA AMACURO") 
+    db.states.insert(name="VARGAS") 
+                                                                       
 init_data()
 
 
@@ -491,5 +561,29 @@ SELECT setval('public.category_id_seq', 0, true);
 ALTER SEQUENCE subcategory_id_seq MINVALUE 0;
 ALTER SEQUENCE subcategory_id_seq MINVALUE 0;
 SELECT setval('public.subcategory_id_seq', 0, true);
+
+
+truncate tatami cascade;
+ALTER SEQUENCE tatami_id_seq MINVALUE 0;
+SELECT setval('public.tatami_id_seq', 0, true);
+
+truncate fight cascade;
+ALTER SEQUENCE fight_id_seq MINVALUE 0;
+SELECT setval('public.fight_id_seq', 0, true);
+truncate states cascade;
+ALTER SEQUENCE states_id_seq MINVALUE 0;
+SELECT setval('public.states_id_seq', 0, true);
+
+truncate athlete cascade;
+ALTER SEQUENCE athlete_id_seq MINVALUE 0;
+SELECT setval('public.athlete_id_seq', 0, true);
+
+truncate dojo cascade;
+ALTER SEQUENCE dojo_id_seq MINVALUE 0;
+SELECT setval('public.dojo_id_seq', 0, true);
+
+truncate school cascade;
+ALTER SEQUENCE school_id_seq MINVALUE 0;
+SELECT setval('public.school_id_seq', 0, true);
 
 """

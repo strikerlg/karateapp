@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # try something like
+@auth.requires_login()
 def index(): 
     fight_id = request.vars.match_id or redirect(URL('default','matchs'))
     Athlete_red  =  db.athlete.with_alias('athlete_red')

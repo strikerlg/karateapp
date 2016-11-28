@@ -60,5 +60,5 @@ def index():
 def athlete():
 
     qry=( (db.athlete.id>0) & (db.dojo.id==db.athlete.dojo_id))
-    grid=SQLFORM.grid(qry,showbuttontext=False, deletable=False, create=False)
+    grid=SQLFORM.grid(qry,showbuttontext=False, deletable=False)
     return dict(grid=grid)

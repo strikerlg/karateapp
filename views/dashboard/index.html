@@ -5,7 +5,7 @@
     -webkit-box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     /*box-shadow: 0 5px 15px rgba(0,0,0,0.5);*/
     background-color: #000;
-}	
+}   
 h2, .h2 {
     font-size: 30px;
     color: #fff;
@@ -17,13 +17,13 @@ body {
     }
 
 #lbl_winner {
-	
-	font-size:32px;
+    
+    font-size:32px;
 color:white;
 text-align:center;
 padding-top:0px; 
-	}	
-	
+    }   
+    
 #label_tatami {
 font-size:32px;
 color:white;
@@ -295,23 +295,23 @@ th,td {
 
 
 
-	<table class="table">
-	<tr>
-		<td>
-			 <div id="btn_set_winner_blue" class="fault_blue_active">  </div
-			 <div> {{= IMG( _width="50px",_heigth="50px",_src= URL('default', 'download', args=[record.athlete_blue.photo]),_alt="de", _id="img_blue_photo" ) }}</div>
-		</td>
-		<td>
-		{{= IMG( _width="200px",_heigth="200px",_src= URL('static', 'images/logo.jpg'),_alt="de" , _id="img_win_photo") }}	 
-		<div id="lbl_winner">GANADOR: </div>
-			
-		</td>
-		<td>
-			   <div id="btn_set_winner_red" class="fault_red_active">  </div>
-			   <div>{{= IMG( _width="50px",_heigth="50px",_src= URL('default', 'download', args=[record.athlete_red.photo]),_alt="de", _id="img_red_photo" ) }}</div>
-		</td>
-	</tr>
-	</table>
+    <table class="table">
+    <tr>
+        <td>
+             <div id="btn_set_winner_blue" class="fault_blue_active">  </div
+             <div> {{= IMG( _width="50px",_heigth="50px",_src= URL('default', 'download', args=[record.athlete_blue.photo]),_alt="de", _id="img_blue_photo" ) }}</div>
+        </td>
+        <td>
+        {{= IMG( _width="200px",_heigth="200px",_src= URL('static', 'images/logo.jpg'),_alt="de" , _id="img_win_photo") }}   
+        <div id="lbl_winner">GANADOR: </div>
+            
+        </td>
+        <td>
+               <div id="btn_set_winner_red" class="fault_red_active">  </div>
+               <div>{{= IMG( _width="50px",_heigth="50px",_src= URL('default', 'download', args=[record.athlete_red.photo]),_alt="de", _id="img_red_photo" ) }}</div>
+        </td>
+    </tr>
+    </table>
       
 
 
@@ -380,19 +380,19 @@ var fight = {
     
     set_winner: function (color){
         if (color=='blue'){
-			this.winner_athlete_id = this.blue_athlete_id;
-			this.finished = 1;
-			$('#lbl_winner').html('GANADOR: ' + this.blue_athlete_name);
-			var img ='{{=  URL("default", "download", args=[record.athlete_blue.photo]) }}'
-			$('#img_win_photo').attr("src", img) ;
-		}
-		if (color=='red'){
-			this.winner_athlete_id = this.red_athlete_id;
-			this.finished = 1;
-			$('#lbl_winner').html('GANADOR: ' + this.red_athlete_name);
-			var img = '{{=URL("default", "download", args=[record.athlete_red.photo])}}';
-			$('#img_win_photo').attr("src", img) ;
-		}
+            this.winner_athlete_id = this.blue_athlete_id;
+            this.finished = 1;
+            $('#lbl_winner').html('GANADOR: ' + this.blue_athlete_name);
+            var img ='{{=  URL("default", "download", args=[record.athlete_blue.photo]) }}'
+            $('#img_win_photo').attr("src", img) ;
+        }
+        if (color=='red'){
+            this.winner_athlete_id = this.red_athlete_id;
+            this.finished = 1;
+            $('#lbl_winner').html('GANADOR: ' + this.red_athlete_name);
+            var img = '{{=URL("default", "download", args=[record.athlete_red.photo])}}';
+            $('#img_win_photo').attr("src", img) ;
+        }
         
         
     },
@@ -412,7 +412,7 @@ var fight = {
         score = parseInt(score);
         
         score = score + num;
-        if (score>=0 && fight.cronometer_active && this.finished==0){
+        if (score>=0 && !fight.cronometer_active && this.finished==0){
             obj.html(score); 
             if (color=='red'){ this.red_score=score; }    ; 
             if (color=='blue'){ this.blue_score=score; }  ;
@@ -461,12 +461,12 @@ var fight = {
                         
                         tmp_color = '';
                         if (this.red_score < this.blue_score)
-							             tmp_color='blue';
-					              else
-							             tmp_color='red';
+                                         tmp_color='blue';
+                                  else
+                                         tmp_color='red';
                         $('#anuncio').modal('toggle');
                         this.set_winner(tmp_color);
-					 
+                     
                        
                         
                     }else{
@@ -501,14 +501,14 @@ var fight = {
                 document.getElementById("protection").innerHTML=fmt+this.protection_secs;
 
                 if(this.protection_secs == 0){
-					 $('#anuncio').modal('toggle');
-					 color_winner = '';
-					 if (this.protection_color=='blue')
-						color_winner='red';
-					 else
-					    color_winner='blue';
-					 this.set_winner(color_winner);
-					 
+                     $('#anuncio').modal('toggle');
+                     color_winner = '';
+                     if (this.protection_color=='blue')
+                        color_winner='red';
+                     else
+                        color_winner='blue';
+                     this.set_winner(color_winner);
+                     
                      document.getElementById("protection").innerHTML="Finalizado";
                 }
             }
@@ -531,48 +531,48 @@ var fight = {
         }
     },      
     inc_penalty: function(color, cat){
-		
-		if (color=='blue' && cat==1){
-			if (this.blue_c1<4)
-				this.add_penalty(color,cat,this.blue_c1 +1);
-			
-		}
-		if (color=='blue' && cat==2){
-			if (this.blue_c2<4)
-				this.add_penalty(color,cat,this.blue_c2 +1);
-		}
-		if (color=='red' && cat==1){
-			if (this.red_c1<4)
-				this.add_penalty(color,cat,this.red_c1 +1);
-		}	
-		if (color=='red' && cat==2){
-			if (this.red_c2<4)
-				this.add_penalty(color,cat,this.red_c2 +1);	
-		}		
-			
+        
+        if (color=='blue' && cat==1){
+            if (this.blue_c1<4)
+                this.add_penalty(color,cat,this.blue_c1 +1);
+            
+        }
+        if (color=='blue' && cat==2){
+            if (this.blue_c2<4)
+                this.add_penalty(color,cat,this.blue_c2 +1);
+        }
+        if (color=='red' && cat==1){
+            if (this.red_c1<4)
+                this.add_penalty(color,cat,this.red_c1 +1);
+        }   
+        if (color=='red' && cat==2){
+            if (this.red_c2<4)
+                this.add_penalty(color,cat,this.red_c2 +1); 
+        }       
+            
 
     }, 
     
     decrement_penalty: function(color, cat){
-		
-		if (color=='blue' && cat==1){
-			if (this.blue_c1>0)
-				this.add_penalty(color,cat,this.blue_c1 -1);
-			
-		}
-		if (color=='blue' && cat==2){
-			if (this.blue_c2>0)
-				this.add_penalty(color,cat,this.blue_c2 -1);
-		}
-		if (color=='red' && cat==1){
-			if (this.red_c1>0)
-				this.add_penalty(color,cat,this.red_c1 -1);
-		}	
-		if (color=='red' && cat==2){
-			if (this.red_c2>0)
-				this.add_penalty(color,cat,this.red_c2 -1);	
-		}		
-			
+        
+        if (color=='blue' && cat==1){
+            if (this.blue_c1>0)
+                this.add_penalty(color,cat,this.blue_c1 -1);
+            
+        }
+        if (color=='blue' && cat==2){
+            if (this.blue_c2>0)
+                this.add_penalty(color,cat,this.blue_c2 -1);
+        }
+        if (color=='red' && cat==1){
+            if (this.red_c1>0)
+                this.add_penalty(color,cat,this.red_c1 -1);
+        }   
+        if (color=='red' && cat==2){
+            if (this.red_c2>0)
+                this.add_penalty(color,cat,this.red_c2 -1); 
+        }       
+            
 
     },    
        
@@ -588,8 +588,8 @@ var fight = {
         for (var i=0; i<=cant; i++){
             btn = 'btn_cat'+cat+'_'+color+'_'+i;
             if (i>0){
-				$( '#'+btn ).addClass( 'fault_'+color+'_active' );
-			}
+                $( '#'+btn ).addClass( 'fault_'+color+'_active' );
+            }
             if (color=='blue' && cat==1){
                 this.blue_c1 = cant;
             }
@@ -606,14 +606,14 @@ var fight = {
         }
         
         if (cant==4){
-				tmp ='';
-				if (color=='blue')
-					tmp='red';
-				else
-					tmp='blue';
-				$('#anuncio').modal('toggle');
-				this.set_winner(tmp);
-			}
+                tmp ='';
+                if (color=='blue')
+                    tmp='red';
+                else
+                    tmp='blue';
+                $('#anuncio').modal('toggle');
+                this.set_winner(tmp);
+            }
     },    
       
 }
@@ -837,18 +837,18 @@ $( "div[id^='btn_cat1']" ).click(function() {
 
                  fight.add_penalty('blue', 1, idx-1)
             }else{ 
-				if (idx>0 && fight.blue_c1 == idx-1){
-					fight.add_penalty('blue', 1, idx);
-				}
+                if (idx>0 && fight.blue_c1 == idx-1){
+                    fight.add_penalty('blue', 1, idx);
+                }
             }
         }
         if (this.id == btn_red){
             if (fight.red_c1 == idx){
                  fight.add_penalty('red', 1, idx-1)
             }else{ 
-				if (idx>0 && fight.red_c1 == idx-1){
-					fight.add_penalty('red', 1, idx);
-				}
+                if (idx>0 && fight.red_c1 == idx-1){
+                    fight.add_penalty('red', 1, idx);
+                }
             }
         }
     }
@@ -867,18 +867,18 @@ $( "div[id^='btn_cat2']" ).click(function() {
 
                  fight.add_penalty('blue', 2, idx-1)
             }else{ 
-				if (idx>0 && fight.blue_c2 == idx-1){
-					fight.add_penalty('blue', 2, idx);
-				}
+                if (idx>0 && fight.blue_c2 == idx-1){
+                    fight.add_penalty('blue', 2, idx);
+                }
             }
         }
         if (this.id == btn_red){
             if (fight.red_c2 == idx){
                  fight.add_penalty('red', 2, idx-1)
             }else{ 
-				if (idx>0 && fight.red_c2 == idx-1){
-					fight.add_penalty('red', 2, idx);
-				}
+                if (idx>0 && fight.red_c2 == idx-1){
+                    fight.add_penalty('red', 2, idx);
+                }
             }
         }
     }

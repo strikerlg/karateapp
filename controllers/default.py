@@ -8,12 +8,87 @@
 # - download is for downloading files uploaded in the db (does streaming)
 # -------------------------------------------------------------------------
 
-
+@auth.requires_login()
 def index():
 
-    tournaments = db(db.tournament.id>0).select()
-    return dict(tournaments=tournaments)
+    #cat_min = db.category.id.min()
+    #cat_id= request.vars.category_id or db(db.category.gender_id==gender_default).select(cat_min).first()[cat_min]
+    tatami_default = request.vars.tatami_id or '0'
+    
 
+    tatamis = db(  db.tatami.id>0  ).select(db.tatami.ALL)
+    #categories = db(  (db.category.id>0) & (db.category.gender_id == gender_default)  ).select(db.category.ALL)
+
+    def get_photo_blue(i,r):
+      dojo = ''
+      try:
+         rs = db( db.athlete.id == r.athlete_blue_id).select(db.athlete.dojo_id).render(0) 
+         dojo = rs.dojo_id
+      except:
+         pass      
+      txt = db( db.athlete.id == r.athlete_blue_id).select(db.athlete.name).first().as_dict()['name'] if db( db.athlete.id == r.athlete_blue_id).select(db.athlete.name).first() else '..'
+      url_photo = db( db.athlete.id == r.athlete_blue_id).select(db.athlete.photo).first().as_dict()['photo'] if db( db.athlete.id == r.athlete_blue_id).select(db.athlete.name).first() else None
+      photo =   IMG( _width="60px",_heigth="60px",_src= URL('default', 'download', args=[url_photo]),_alt=url_photo )
+      if url_photo is None or len(url_photo)<1:
+       photo =   IMG( _width="60px",_heigth="60px",_src= URL('static', 'images/nophoto.jpg', args=[url_photo]),_alt='')
+
+      return DIV(photo, txt,BR(),STRONG(dojo),_style="color:#0000ff;") 
+
+    def get_photo_red(i,r):
+      dojo = ''
+      try:
+         rs = db( db.athlete.id == r.athlete_red_id).select(db.athlete.dojo_id).render(0) 
+         dojo = rs.dojo_id
+      except:
+         pass
+
+      
+      txt = db( db.athlete.id == r.athlete_red_id).select(db.athlete.name).first().as_dict()['name'] if db( db.athlete.id == r.athlete_red_id).select(db.athlete.name).first() else '..'
+      url_photo = db( db.athlete.id == r.athlete_red_id).select(db.athlete.photo).first().as_dict()['photo'] if db( db.athlete.id == r.athlete_red_id).select(db.athlete.name).first() else None
+      photo = IMG( _width="60px",_heigth="60px",_src= URL('default', 'download', args=[url_photo]),_alt=url_photo )
+      if url_photo is None or len(url_photo)<1:
+       photo =   IMG( _width="60px",_heigth="60px",_src= URL('static', 'images/nophoto.jpg', args=[url_photo]),_alt='')
+      return DIV(photo, txt,BR(),STRONG(dojo) ,_style="color:#ff0000;")       
+    #db.athlete.photo.represent = lambda r,i: IMG( _width="80px",_heigth="80px",_src= URL('default', 'download', args=[i.photo]),_alt="de" )
+    db.fight.athlete_blue_id.represent = lambda i,r: get_photo_blue(i,r)
+    db.fight.athlete_red_id.represent = lambda i,r: get_photo_red(i,r)
+    db.fight.athlete_win_id.represent = lambda i,r: db( db.athlete.id == r.athlete_win_id).select(db.athlete.name).first().as_dict()['name'] if db( db.athlete.id == r.athlete_win_id).select(db.athlete.name).first() else '..'
+ 
+    
+
+    qry=( (db.fight.tatami_id==tatami_default) & (db.fight.finished == None)  
+        & ( (db.fight.athlete_red_id != None) |  (db.fight.athlete_blue_id != None) )
+        & (db.fight.athlete_win_id == None)  )
+    if tatami_default == '0':
+       qry=( (db.fight.tatami_id==None) & (db.fight.finished == None)  
+        & ( (db.fight.athlete_red_id != None) |  (db.fight.athlete_blue_id != None) )
+        & (db.fight.athlete_win_id == None)  )
+
+    fields = (db.fight.phase,
+              db.fight.fight_num, 
+              db.fight.gender_id,
+              db.fight.category_id,
+              db.fight.subcategory_id,
+              db.fight.tatami_id,
+              db.fight.athlete_blue_id, 
+              db.fight.athlete_red_id,
+              db.fight.athlete_win_id, 
+              db.fight.blue_score,
+              db.fight.red_score
+              )
+    #<a type="button" target="_blank"  href="{{=URL('dashboard','index',vars=dict(match_id=record.fight.id)) }}" class="btn btn-primary btn-xs">Tablero de Control</a>
+    links = [lambda row: A('Tablero',_href=URL('dashboard','index',vars=dict(match_id=row.id)), _class="btn btn-primary btn-xs" )] 
+    grid = SQLFORM.grid(qry,showbuttontext=False, fields = fields , links=links, deletable=False, create=False)
+    
+    tatamis = db.executesql("""select count(b.id) as peleas, coalesce(a.name,'SINF.') as tatami ,coalesce(a.id,0) as id from tatami a
+                                        FULL outer join fight b on a.id= b.tatami_id
+                                        where finished is null 
+
+                                        group by 2,3 order by 3 """,as_dict=True)
+
+    return dict(grid=grid,tatamis=tatamis, tatami_default = tatami_default)
+
+@auth.requires_login()
 def matchs():
     Athlete_red  =  db.athlete.with_alias('athlete_red')
     Athlete_blue  =  db.athlete.with_alias('athlete_blue')
@@ -27,7 +102,9 @@ def matchs():
                                                                     db.category.on(  db.fight.category_id == db.category.id ),   
                                                                     db.gender.on(  db.fight.gender_id == db.gender.id ), 
                                                             ),orderby=(db.fight.phase,db.fight.id))
-    return dict(matchs=matchs)
+    
+    matchs_by_tatami = db.executesql("""select count(*),coalesce(tatami_id,0) from fight group by 2 """,as_dict=True)
+    return dict(matchs=matchs,matchs_by_tatami= matchs_by_tatami)
     
 def users():
 
@@ -69,3 +146,6 @@ def call():
     supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
     """
     return service()
+def carga_atleta():
+  from gluon.contrib.populate import populate
+  populate(db.athlete,1000)

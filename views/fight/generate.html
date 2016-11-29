@@ -2,5 +2,6 @@
 
 <h1>{{=T('Generate Matchs')}}</h1>
 
-
-{{=grid}}
+{{for rs in grid:}}
+{{=XML(rs)}}
+{{pass}}

@@ -56,7 +56,7 @@ def save_fight():
     fight_num = math.ceil(rs1.fight_num/2.0)
     is_blue = True if rs1.fight_num % 2 ==0 else False
 
-    qry2 = db( (db.fight.category_id==rs1.category_id ) & (db.fight.phase==rs1.phase+1) & (db.fight.fight_num== fight_num) ) 
+    qry2 = db( (db.fight.subcategory_id==rs1.subcategory_id ) & (db.fight.phase==rs1.phase+1) & (db.fight.fight_num== fight_num) ) 
     if is_blue:
         qry2.update(
             athlete_blue_id = fight['winner_athlete_id'],

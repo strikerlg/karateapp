@@ -13,11 +13,25 @@ def index():
 
     #cat_min = db.category.id.min()
     #cat_id= request.vars.category_id or db(db.category.gender_id==gender_default).select(cat_min).first()[cat_min]
-    tatami_default = request.vars.tatami_id or '0'
+    tatami_default = request.vars.tatami_default or '0'
     
 
     tatamis = db(  db.tatami.id>0  ).select(db.tatami.ALL)
-    #categories = db(  (db.category.id>0) & (db.category.gender_id == gender_default)  ).select(db.category.ALL)
+
+
+    cat_min = db.category.id.min()
+    subcat_min = db.subcategory.id.min()
+    gender_default = request.vars.gender_default or 0
+    
+    cat_id= request.vars.category_id or db(db.category.gender_id==gender_default).select(cat_min).first()[cat_min]
+    
+    subcat_default = request.vars.subcat_default or db(db.subcategory.category_id==cat_id).select(subcat_min).first()[subcat_min]
+    nu_phase_default = request.vars.nu_phase or 1
+    genders = db(  db.gender.id>0  ).select(db.gender.ALL)
+    categories = db(  (db.category.id>0) & (db.category.gender_id == gender_default)  ).select(db.category.ALL)
+    subcategories = db( (db.subcategory.id>0) & (db.subcategory.category_id==cat_id) ).select(db.subcategory.ALL)
+
+
 
     def get_photo_blue(i,r):
       dojo = ''
@@ -54,15 +68,34 @@ def index():
     db.fight.athlete_red_id.represent = lambda i,r: get_photo_red(i,r)
     db.fight.athlete_win_id.represent = lambda i,r: db( db.athlete.id == r.athlete_win_id).select(db.athlete.name).first().as_dict()['name'] if db( db.athlete.id == r.athlete_win_id).select(db.athlete.name).first() else '..'
  
-    
+    qrys = []
+    if  tatami_default!='0':
+      qrys=[ db.fight.tatami_id==tatami_default ]
+    else:
+      qrys=[ db.fight.tatami_id==None ]
 
-    qry=( (db.fight.tatami_id==tatami_default) & (db.fight.finished == None)  
+
+    if  gender_default!='0':
+      qrys.append(db.fight.gender_id==gender_default )
+
+    if  cat_id!='0':
+      qrys.append(db.fight.category_id==cat_id )      
+    if  subcat_default!='0':
+      qrys.append(db.fight.subcategory_id==subcat_default ) 
+       
+    qrys.append( db.fight.finished == None )
+    qrys.append(  (db.fight.athlete_red_id != None) |  (db.fight.athlete_blue_id != None) )
+    qrys.append( db.fight.athlete_win_id == None )
+
+    """qry=( (db.fight.tatami_id==tatami_default) & (db.fight.finished == None)  
         & ( (db.fight.athlete_red_id != None) |  (db.fight.athlete_blue_id != None) )
         & (db.fight.athlete_win_id == None)  )
     if tatami_default == '0':
        qry=( (db.fight.tatami_id==None) & (db.fight.finished == None)  
         & ( (db.fight.athlete_red_id != None) |  (db.fight.athlete_blue_id != None) )
         & (db.fight.athlete_win_id == None)  )
+    """
+    qry = reduce(lambda a, b:(a & b), qrys)
 
     fields = (db.fight.phase,
               db.fight.fight_num, 
@@ -86,7 +119,7 @@ def index():
 
                                         group by 2,3 order by 3 """,as_dict=True)
 
-    return dict(grid=grid,tatamis=tatamis, tatami_default = tatami_default)
+    return dict(grid=grid,tatamis=tatamis, tatami_default = tatami_default,genders= genders , gender_default=gender_default, categories = categories, cat_id=cat_id,subcategories = subcategories, subcat_default = subcat_default)
 
 @auth.requires_login()
 def matchs():

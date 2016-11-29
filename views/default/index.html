@@ -5,14 +5,64 @@
 {{stractive=''}}
 
 
- <ul class="nav nav-tabs" role="tablist">
-   
-    {{for tatami in tatamis:}}
-    {{stractive =' class="active" ' if int(tatami['id'])==int(tatami_default) else ' ' }}
-    <li role="presentation" {{=XML(stractive)}} ><a href="{{=URL('default','index',vars=dict(tatami_id=tatami['id']))}}" aria-controls="home" role="tab" ><strong>{{=tatami['tatami']}}</strong> ({{=tatami['peleas']}})</a></li>
-    {{pass}}
-</ul>
 
+{{stractive=''}}
+<div class="panel panel-default">
+  <div class="panel-heading">Criterios</div>
+  <div class="panel-body">
+  
+
+    <form id="frm1" method="post" action="{{=URL('default','index')}}" >
+    <label class="control-label" for="tatami_default">{{=T('tatami')}}:</label>
+<select class="auto_post"  id="tatami_default" name="tatami_default">
+       
+       
+        {{for tatami in tatamis:}}
+        {{stractive =' selected ' if int(tatami['id'])==int(tatami_default) else ' ' }}
+        <option value="{{=tatami['id']}}" {{=XML(stractive)}} >{{=tatami['tatami']}} ({{=tatami['peleas']}})</option>
+        {{pass}}
+   </select>  
+    <label class="control-label" for="gender_default">{{=T('gender')}}:</label>
+     <select class="auto_post"  id="gender_default" name="gender_default">
+         <option value="0" >Seleccione</option>
+        {{for gender in genders:}}
+        {{stractive =' selected' if int(gender.id)==int(gender_default) else ' ' }}
+        <option  {{=XML(stractive)}} value="{{=gender.id}}" >{{=gender.name}}</option>
+        {{pass}}
+    </select>
+    <label class="control-label" for="category_id">{{=T('category')}}:</label>
+     <select class="auto_post"  id="category_id" name="category_id">
+         <option value="0" >Seleccione</option>
+        {{for cat in categories:}}
+        {{stractive =' selected' if int(cat.id)==int(cat_id) else ' ' }}
+        <option  {{=XML(stractive)}} value="{{=cat.id}}" >{{=cat.name}}</option>
+        {{pass}}
+    </select>
+    <label class="control-label" for="subcat_default">{{=T('subcategory')}}:</label>
+     <select  class="auto_post"  id="subcat_default" name="subcat_default">
+         <option value="0" >Seleccione</option>
+        {{for cat in subcategories:}}
+        {{stractive =' selected' if int(cat.id)==int(subcat_default) else ' ' }}
+         <option  {{=XML(stractive)}} value="{{=cat.id}}" >{{=cat.name}}</option>
+        {{pass}}
+    </select>
+
+
+    </form>
+
+  </div>
+</div>
 
 {{=grid}}
 
+<script>
+$( ".auto_post" ).change(function() {
+
+   $( "#frm1" ).submit();
+});
+
+
+
+ 
+
+</script>

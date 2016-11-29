@@ -31,6 +31,7 @@ if not request.env.web2py_runtime_gae:
     db = DAL(myconf.get('db.uri'),
              pool_size=myconf.get('db.pool_size'),
              migrate_enabled=myconf.get('db.migrate'),
+             
              check_reserved=['all'])
 else:
     # ---------------------------------------------------------------------
@@ -178,8 +179,13 @@ db.define_table('circuit',
                #Field('tournament_id',db.tournament, label = T('tournament')),
                format = "%(name)s",
                )
+db.define_table('category_type',
+			 Field('name', label = T('name'), requires = IS_UPPER()),
+			format="%(name)s"
+			)
 db.define_table('category',
                Field('name', label = T('name'), requires = IS_UPPER()),
+               Field('category_type_id',db.category_type),
                Field('tournament_id',db.tournament, label = T('tournament')),
                Field('gender_id',db.gender,label=T('gender')),
                Field('age_min','integer',label=T('age_min')),
@@ -209,14 +215,14 @@ def calculate_age(birth):
     return years               
                
 
-def set_category( birth_date_ , gender_, circuit_):
+def set_category( birth_date_ , gender_, circuit_, type_):
     age = calculate_age(birth_date_)
-    category_id = db( (db.category.gender_id== gender_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
+    category_id = db( (db.category.gender_id== gender_ ) & (db.category.category_type_id== type_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
     if circuit_==2:
-        category_id = db( (db.category.gender_id== gender_ ) & (db.category.circuit_id== circuit_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
+        category_id = db( (db.category.gender_id== gender_ ) & (db.category.category_type_id== type_ ) & (db.category.circuit_id== circuit_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
     return category_id 
 
-def set_subcategory( birth_date_ , gender_, grade_id,circuit_, weight_):
+def set_subcategory( birth_date_ , gender_, grade_id, circuit_,type_, weight_):
     import logging
     logger = logging.getLogger(request.application)
     logger.setLevel(logging.DEBUG)
@@ -229,7 +235,7 @@ def set_subcategory( birth_date_ , gender_, grade_id,circuit_, weight_):
     category_id = None
     subcategory_id = None
     if circuit_==2:
-      category_id = db( (db.category.gender_id== gender_ ) & (db.category.circuit_id== circuit_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age)
+      category_id = db( (db.category.gender_id== gender_ ) & (db.category.category_type_id== type_ ) & (db.category.circuit_id== circuit_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age)
                       ).select(db.category.id).first().as_dict()['id']
       subcategory_id = db (  (db.subcategory.category_id==category_id) & 
                              (db.subcategory.grade_max_id>=grade_id) & 
@@ -238,7 +244,7 @@ def set_subcategory( birth_date_ , gender_, grade_id,circuit_, weight_):
                              (db.subcategory.weight_max>=weight_) 
                       ).select(db.subcategory.id).first().as_dict()['id']
     else:
-      category_id = db( (db.category.gender_id== gender_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age)
+      category_id = db( (db.category.gender_id== gender_ ) & (db.category.category_type_id== type_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age)
                       ).select(db.category.id).first().as_dict()['id']
       subcategory_id = db (  (db.subcategory.category_id==category_id) & (db.subcategory.grade_max_id>=grade_id) & (db.subcategory.grade_min_id<=grade_id)
                       ).select(db.subcategory.id).first().as_dict()['id']
@@ -247,7 +253,7 @@ def set_subcategory( birth_date_ , gender_, grade_id,circuit_, weight_):
     logger.debug('CDSM3')
     
     return subcategory_id  
-
+KUMITE_ID=1
 db.define_table('athlete',
                Field('tournament_id',db.tournament, label = T('tournament'),default=1),
                Field('photo','upload',requires=IS_NULL_OR(IS_IMAGE())),
@@ -260,8 +266,12 @@ db.define_table('athlete',
                Field('weight', 'integer',label = T('weight'), default=0),
                Field('dojo_id',db.dojo, label = T('dojo')),
                Field('circuit_id',db.circuit, label = T('circuit'), default=1),
-               Field('category_id',db.category, compute = lambda r: set_category(r['birth_date'], r['gender_id'], r['circuit_id'])),
-               Field('subcategory_id',db.subcategory, compute = lambda r: set_subcategory( r['birth_date'], r['gender_id'] , r['grade_id'],  r['circuit_id'], r['weight']))
+	       Field('disability','boolean',label=T('disability'),default=False),
+	       Field('kumite','boolean',label=T('kumite')),
+	       Field('kata_individual','boolean',label=T('kata_individual')),
+	       Field('kata_team','boolean',label=T('kata_team')),
+               Field('category_id',db.category, compute = lambda r: set_category(r['birth_date'], r['gender_id'], r['circuit_id'],KUMITE_ID)),
+               Field('subcategory_id',db.subcategory, compute = lambda r: set_subcategory( r['birth_date'], r['gender_id'] , r['grade_id'],  r['circuit_id'],KUMITE_ID, r['weight']))
                )
 
 
@@ -286,6 +296,7 @@ db.define_table('fight',
                Field('blue_c2','integer', label = T('blue_penalty_c2') , writable =False   ) ,
                Field('red_c1','integer', label = T('red_penalty_c1') , writable =False   ) ,
                Field('red_c2','integer', label = T('red_penalty_c2') , writable =False   ) ,
+	       
                
                
                )
@@ -542,7 +553,11 @@ def init_data():
     db.states.insert(name="AMAZONAS") 
     db.states.insert(name="DELTA AMACURO") 
     db.states.insert(name="VARGAS") 
-                                                                       
+  if db(db.category_type.id>0).isempty():
+    db.category_type.insert(name="KUMITE")
+    db.category_type.insert(name="KATA INDIVIDUAL")
+    db.category_type.insert(name="KATA EQUIPO")
+                                                                    
 init_data()
 
 

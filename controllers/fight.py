@@ -4,14 +4,16 @@
 
 def index():
     cat_min = db.category.id.min()
+    subcat_min = db.subcategory.id.min()
     gender_default = request.vars.gender_default or 1
-    cat_id= request.vars.category_id or db(db.category.gender_id==gender_default).select(cat_min).first()[cat_min]
-    nu_phase_default = request.vars.nu_phase or 1
     
-
+    cat_id= request.vars.category_id or db(db.category.gender_id==gender_default).select(cat_min).first()[cat_min]
+    
+    subcat_default = request.vars.subcat_default or db(db.subcategory.category_id==cat_id).select(subcat_min).first()[subcat_min]
+    nu_phase_default = request.vars.nu_phase or 1
     genders = db(  db.gender.id>0  ).select(db.gender.ALL)
     categories = db(  (db.category.id>0) & (db.category.gender_id == gender_default)  ).select(db.category.ALL)
-
+    subcategories = db( (db.subcategory.id>0) & (db.subcategory.category_id==cat_id) ).select(db.subcategory.ALL)
     def get_photo_blue(i,r):
       dojo = ''
       try:
@@ -21,9 +23,9 @@ def index():
          pass      
       txt = db( db.athlete.id == r.athlete_blue_id).select(db.athlete.name).first().as_dict()['name'] if db( db.athlete.id == r.athlete_blue_id).select(db.athlete.name).first() else '..'
       url_photo = db( db.athlete.id == r.athlete_blue_id).select(db.athlete.photo).first().as_dict()['photo'] if db( db.athlete.id == r.athlete_blue_id).select(db.athlete.name).first() else None
-      photo =   IMG( _width="60px",_heigth="60px",_src= URL('default', 'download', args=[url_photo]),_alt=txt )
+      photo =   IMG( _width="60px",_heigth="60px",_src= URL('default', 'download', args=[url_photo]),_alt='' )
       if url_photo is None:
-       photo =   IMG( _width="60px",_heigth="60px",_src= URL('static', 'images/nophoto.jpg', args=[url_photo]),_alt=txt)
+       photo =   IMG( _width="60px",_heigth="60px",_src= URL('static', 'images/nophoto.jpg', args=[url_photo]),_alt='')
 
       return DIV(photo, txt,BR(),STRONG(dojo),_style="color:#0000ff;") 
 
@@ -38,9 +40,9 @@ def index():
       
       txt = db( db.athlete.id == r.athlete_red_id).select(db.athlete.name).first().as_dict()['name'] if db( db.athlete.id == r.athlete_red_id).select(db.athlete.name).first() else '..'
       url_photo = db( db.athlete.id == r.athlete_red_id).select(db.athlete.photo).first().as_dict()['photo'] if db( db.athlete.id == r.athlete_red_id).select(db.athlete.name).first() else None
-      photo = IMG( _width="60px",_heigth="60px",_src= URL('default', 'download', args=[url_photo]),_alt=txt )
+      photo = IMG( _width="60px",_heigth="60px",_src= URL('default', 'download', args=[url_photo]),_alt='' )
       if url_photo is None:
-       photo =   IMG( _width="60px",_heigth="60px",_src= URL('static', 'images/nophoto.jpg', args=[url_photo]),_alt=txt)
+       photo =   IMG( _width="60px",_heigth="60px",_src= URL('static', 'images/nophoto.jpg', args=[url_photo]),_alt='')
       return DIV(photo, txt,BR(),STRONG(dojo) ,_style="color:#ff0000;")       
     #db.athlete.photo.represent = lambda r,i: IMG( _width="80px",_heigth="80px",_src= URL('default', 'download', args=[i.photo]),_alt="de" )
     db.fight.athlete_blue_id.represent = lambda i,r: get_photo_blue(i,r)
@@ -50,10 +52,10 @@ def index():
     db.fight.category_id.default = cat_id
     db.fight.category_id.writable=False 
     max_phase = db.fight.phase.max()
-    qry=( (db.fight.category_id==cat_id ) & (db.category.gender_id == gender_default)  )
+    qry=( (db.fight.subcategory_id==subcat_default )  )
     max_phase = db(qry).select(max_phase).first()[max_phase] or 0
 
-    qry=( (db.fight.category_id==cat_id) & ( db.fight.gender_id==gender_default ) & (db.fight.phase==nu_phase_default)) 
+    qry=( (db.fight.subcategory_id==subcat_default) & (db.fight.phase==nu_phase_default)) 
 
     fields = (db.fight.fight_num, 
               db.fight.gender_id,
@@ -67,10 +69,10 @@ def index():
               db.fight.red_score
               )
 
-    grid = SQLFORM.grid(qry,showbuttontext=False, fields = fields, deletable=False, create=False)
+    grid = SQLFORM.grid(qry,showbuttontext=False, fields = fields, deletable=False, create=False, searchable=False)
     return dict(grid=grid,categories = categories, cat_id=cat_id, 
         max_phase = max_phase, nu_phase_default = nu_phase_default
-        ,genders= genders , gender_default=gender_default)
+        ,genders= genders , gender_default=gender_default, subcategories = subcategories, subcat_default = subcat_default)
 
 
 
@@ -147,11 +149,19 @@ def bracket():
     response.files.append(URL('static','css/jquery.bracket.min.css') )
 
     cat_min = db.category.id.min()
-    cat_id= request.vars.category_id or db().select(cat_min).first()[cat_min]
-    categories = db(  db.category.id>0  ).select(db.category.ALL)
+    subcat_min = db.subcategory.id.min()
+    gender_default = request.vars.gender_default or 1
+    
+    cat_id= request.vars.category_id or db(db.category.gender_id==gender_default).select(cat_min).first()[cat_min]
+    
+    subcat_default = request.vars.subcat_default or db(db.subcategory.category_id==cat_id).select(subcat_min).first()[subcat_min]
+    nu_phase_default = request.vars.nu_phase or 1
+    genders = db(  db.gender.id>0  ).select(db.gender.ALL)
+    categories = db(  (db.category.id>0) & (db.category.gender_id == gender_default)  ).select(db.category.ALL)
+    subcategories = db( (db.subcategory.id>0) & (db.subcategory.category_id==cat_id) ).select(db.subcategory.ALL)
     
     max_phase = db.fight.phase.max()
-    qry=( (db.fight.category_id==cat_id )   )
+    qry=( (db.fight.subcategory_id==subcat_default )   )
     max_phase = db(qry).select(max_phase).first()[max_phase] or 0
 
 
@@ -160,9 +170,9 @@ def bracket():
      from fight a 
      left join athlete b1 on a.athlete_blue_id = b1.id 
      left join athlete b2 on a.athlete_red_id = b2.id
-     where a.category_id=%s and phase=1 order by a.id limit 32
+     where a.subcategory_id=%s and phase=1 order by a.id limit 32
 
-     """%str(cat_id)
+     """%str(subcat_default)
      ,as_dict=True)
 
 
@@ -178,22 +188,23 @@ def bracket():
      from fight a 
      left join athlete b1 on a.athlete_blue_id = b1.id 
      left join athlete b2 on a.athlete_red_id = b2.id
-     where a.category_id=%s order by a.id limit 32
-    """%str(cat_id)
+     where a.subcategory_id=%s order by a.id limit 32
+    """%str(subcat_default)
     ,as_dict=True)
 
     #return str(fights)
-    return dict(fights=fights,categories = categories, cat_id=cat_id, results=results,max_phase = max_phase)
+    return dict(fights=fights,genders= genders , gender_default=gender_default, categories = categories, cat_id=cat_id, results=results,max_phase = max_phase,subcategories = subcategories, subcat_default = subcat_default)
 
-def generate_matchs():
+def generate():
     import math
     import random
     mensaje=[]
-
+    subcat_default = request.vars.subid or 0
     genders = db(db.gender.id>0).select(db.gender.ALL)
     for gender in genders:
         #categories_count = db( (db.category.id>0) ).count()
         subcategories = db((db.subcategory.id>0) 
+		                & (db.subcategory.id==subcat_default)
                         & (db.subcategory.category_id==db.category.id) 
                         & (db.category.gender_id == gender.id)).select(db.category.ALL, db.subcategory.ALL)
         #gender =  db(db.gender.id>0).select(db.gender.ALL)
@@ -216,7 +227,9 @@ def generate_matchs():
             for did in athlete_by_dojo.keys():
                 for idx,athlete in enumerate(athlete_by_dojo[did]):
                     athletes.append( (athlete,idx) )
+            #return str(athletes)
             athletes.sort(key=lambda x:x[1])
+            #return str(athletes)
             athletes = [ a[0] for a in athletes]
 
             def is_divisible(count_):
@@ -285,21 +298,54 @@ def generate_matchs():
                                 fight_num = i+1,
                                 athlete_blue_id =None,
                                 athlete_red_id = None,
-                                category_id = rscat.subcategory.id,
+                                category_id = rscat.subcategory.category_id,
                                 subcategory_id = rscat.subcategory.id,
                                 gender_id = gender.id
                             
                              )
                          
 
-                    mensaje.append( gender.name + " CARGA CATEGORIA %s (%s) OK, %s COMBATES CARGADOS "% (str(B(rscat.category.name)), str(B(rscat.subcategory.name ) ) , str(matchs_count)))
+                    mensaje.append( '<div class="alert alert-success" role="alert">'+ gender.name + " CARGA CATEGORIA %s (%s) OK, %s COMBATES CARGADOS </div>"% (str(B(rscat.category.name)), str(B(rscat.subcategory.name ) ) , str(matchs_count)))
                 else:
-                    mensaje.append( gender.name + " CARGA CATEGORIA %s (%s) FALLO POR: NO HAY ATLETAS"% (  str(B(rscat.category.name ) ), str(B(rscat.subcategory.name ) )   )  )
+                    mensaje.append( '<div class="alert alert-danger" role="alert">'+ gender.name + " CARGA CATEGORIA %s (%s) FALLO POR: NO HAY ATLETAS </div>"% (  str(B(rscat.category.name ) ), str(B(rscat.subcategory.name ) )   )  )
             else:
-                mensaje.append( gender.name + " CARGA CATEGORIA %s (%s) FALLO POR: EXISTEN COMBATES  YA CARGADOS"% (str(B(rscat.category.name) ), str(B(rscat.subcategory.name ) ) ))
+                mensaje.append( '<div class="alert alert-danger" role="alert">'+gender.name + " CARGA CATEGORIA %s (%s) FALLO POR: EXISTEN COMBATES  YA CARGADOS </div>"% (str(B(rscat.category.name) ), str(B(rscat.subcategory.name ) ) ))
 
 
     
     
-    return dict(message=mensaje)
+    return dict(grid=mensaje)
+def is_fight_empty(subcategory_id_):
+    val = False
+    val = db( (db.fight.subcategory_id == subcategory_id_ )  ).isempty() 
+    return val
 
+def generate_matchs():
+	
+	sql = """
+	select e.name as circuito,d.name as genero,c.name as categoria, b.name as subcategoria,b.id as subcat_id,
+  c.id as category_id,d.id as gender_id,
+  count(*) as inscritos from athlete a
+	left join subcategory b on (a.subcategory_id=b.id)
+	left join category c on (a.category_id=c.id)
+	left join gender d on (c.gender_id=d.id)
+  left join circuit e on (a.circuit_id=e.id)
+	group by 1,2 ,3,4,5,6,7
+	order by 1,2 ,3	,4	,5,6,7
+	"""
+	datos=[]
+	registro=[ TR(TH('CIRCUITO'),TH('GENERO'),TH('CATEGORIA'),TH('SUBCATEGORIA'),TH('INSCRITOS'),TH('ACCION') ) ]
+
+	rs = db.executesql(sql,as_dict=True)
+	fila2=0
+	for r in rs:
+		
+	  
+		registro.append( TR (TD(r['circuito']),TD(r['genero']), TD(r['categoria']),TD(r['subcategoria']),TD(r['inscritos']), TD( 
+		A('Generar Llave',_class="btn btn-primary btn-xs",_href=URL('fight','generate',vars=dict(subid=r['subcat_id']))) if is_fight_empty(r['subcat_id']) \
+    else A('Ver Llave',_class="btn btn-info btn-xs",_href=URL('fight','bracket',vars=dict(subcat_default=r['subcat_id'] , category_id= r['category_id'],gender_default=r['gender_id'])))
+		)	))
+	datos.append(registro)
+	return  dict(grid = TABLE(registro,_class="table"))
+	
+	

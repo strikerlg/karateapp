@@ -1,0 +1,349 @@
+# -*- coding: utf-8 -*-
+
+# -------------------------------------------------------------------------
+# This scaffolding model makes your app work on Google App Engine too
+# File is released under public domain and you can use without limitations
+# -------------------------------------------------------------------------
+
+if request.global_settings.web2py_version < "2.14.1":
+    raise HTTP(500, "Requires web2py 2.13.3 or newer")
+
+# -------------------------------------------------------------------------
+# if SSL/HTTPS is properly configured and you want all HTTP requests to
+# be redirected to HTTPS, uncomment the line below:
+# -------------------------------------------------------------------------
+# request.requires_https()
+
+# -------------------------------------------------------------------------
+# app configuration made easy. Look inside private/appconfig.ini
+# -------------------------------------------------------------------------
+from gluon.contrib.appconfig import AppConfig
+
+# -------------------------------------------------------------------------
+# once in production, remove reload=True to gain full speed
+# -------------------------------------------------------------------------
+myconf = AppConfig(reload=True)
+
+if not request.env.web2py_runtime_gae:
+    # ---------------------------------------------------------------------
+    # if NOT running on Google App Engine use SQLite or other DB
+    # ---------------------------------------------------------------------
+    db = DAL(myconf.get('db.uri'),
+             pool_size=myconf.get('db.pool_size'),
+             migrate_enabled=myconf.get('db.migrate'),
+             check_reserved=['all'])
+else:
+    # ---------------------------------------------------------------------
+    # connect to Google BigTable (optional 'google:datastore://namespace')
+    # ---------------------------------------------------------------------
+    db = DAL('google:datastore+ndb')
+    # ---------------------------------------------------------------------
+    # store sessions and tickets there
+    # ---------------------------------------------------------------------
+    session.connect(request, response, db=db)
+    # ---------------------------------------------------------------------
+    # or store session in Memcache, Redis, etc.
+    # from gluon.contrib.memdb import MEMDB
+    # from google.appengine.api.memcache import Client
+    # session.connect(request, response, db = MEMDB(Client()))
+    # ---------------------------------------------------------------------
+
+# -------------------------------------------------------------------------
+# by default give a view/generic.extension to all actions from localhost
+# none otherwise. a pattern can be 'controller/function.extension'
+# -------------------------------------------------------------------------
+response.generic_patterns = ['*'] if request.is_local else []
+# -------------------------------------------------------------------------
+# choose a style for forms
+# -------------------------------------------------------------------------
+response.formstyle = myconf.get('forms.formstyle')  # or 'bootstrap3_stacked' or 'bootstrap2' or other
+response.form_label_separator = myconf.get('forms.separator') or ''
+
+# -------------------------------------------------------------------------
+# (optional) optimize handling of static files
+# -------------------------------------------------------------------------
+# response.optimize_css = 'concat,minify,inline'
+# response.optimize_js = 'concat,minify,inline'
+
+# -------------------------------------------------------------------------
+# (optional) static assets folder versioning
+# -------------------------------------------------------------------------
+# response.static_version = '0.0.0'
+
+# -------------------------------------------------------------------------
+# Here is sample code if you need for
+# - email capabilities
+# - authentication (registration, login, logout, ... )
+# - authorization (role based authorization)
+# - services (xml, csv, json, xmlrpc, jsonrpc, amf, rss)
+# - old style crud actions
+# (more options discussed in gluon/tools.py)
+# -------------------------------------------------------------------------
+
+from gluon.tools import Auth, Service, PluginManager
+
+# host names must be a list of allowed host names (glob syntax allowed)
+auth = Auth(db, host_names=myconf.get('host.names'))
+service = Service()
+plugins = PluginManager()
+
+# -------------------------------------------------------------------------
+# create all tables needed by auth if not custom tables
+# -------------------------------------------------------------------------
+auth.settings.extra_fields['auth_user'] =[ Field('group_id', 'integer', label = T('Role')) , Field('tatami_id', 'integer', label = T('Tatami'))]
+auth.define_tables(username=False, signature=False)
+
+# -------------------------------------------------------------------------
+# configure email
+# -------------------------------------------------------------------------
+mail = auth.settings.mailer
+mail.settings.server = 'logging' if request.is_local else myconf.get('smtp.server')
+mail.settings.sender = myconf.get('smtp.sender')
+mail.settings.login = myconf.get('smtp.login')
+mail.settings.tls = myconf.get('smtp.tls') or False
+mail.settings.ssl = myconf.get('smtp.ssl') or False
+
+# -------------------------------------------------------------------------
+# configure auth policy
+# -------------------------------------------------------------------------
+auth.settings.registration_requires_verification = False
+auth.settings.registration_requires_approval = False
+auth.settings.reset_password_requires_verification = True
+auth.settings.create_user_groups = None
+# -------------------------------------------------------------------------
+# Define your tables below (or better in another model file) for example
+#
+# >>> db.define_table('mytable', Field('myfield', 'string'))
+#
+# Fields can be 'string','text','password','integer','double','boolean'
+#       'date','time','datetime','blob','upload', 'reference TABLENAME'
+# There is an implicit 'id integer autoincrement' field
+# Consult manual for more options, validators, etc.
+#
+# More API examples for controllers:
+#
+# >>> db.mytable.insert(myfield='value')
+# >>> rows = db(db.mytable.myfield == 'value').select(db.mytable.ALL)
+# >>> for row in rows: print row.id, row.myfield
+# -------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------
+# after defining tables, uncomment below to enable auditing
+# -------------------------------------------------------------------------
+# auth.enable_record_versioning(db)
+
+
+db.define_table('grade',
+
+               Field('name', label = T('name'),requires=IS_UPPER()),
+               format = "%(name)s",
+                )
+
+db.define_table('gender',
+
+               Field('name', label = T('name'),requires=IS_UPPER()),
+               format = "%(name)s",
+                )
+db.define_table('school',
+               Field('name', label = T('name'),requires=IS_UPPER()),
+               format = "%(name)s",
+               )
+               
+db.define_table('states',
+               Field('code'),
+               Field('name', label = T('name') ,requires=IS_UPPER()),
+               format = "%(name)s",
+               )
+db.define_table('tournament',
+               Field('name', label = T('name'),requires=[IS_NOT_EMPTY(), IS_UPPER()]),
+               Field('description', label = T('descriptions'),requires=IS_NOT_EMPTY()),
+               Field('date_start','datetime', label = T('date_start')),
+               Field('bracket','boolean',writable=False,default=False),
+               format = "%(name)s",
+               )
+db.define_table('dojo',
+               Field('name', label = T('name') , requires = IS_UPPER() ),
+               Field('school_id',db.school, label = T('school')),
+               Field('state_id',db.states, label = T('state')),
+               format = "%(name)s",
+               )
+
+db.define_table('tatami',
+               Field('name', label = T('name')),
+               Field('tournament_id',db.tournament, label = T('tournament')),
+               format = "%(name)s",
+               )
+
+db.define_table('category',
+               Field('name', label = T('name'), requires = IS_UPPER()),
+               Field('tournament_id',db.tournament, label = T('tournament')),
+               Field('gender_id',db.gender,label=T('gender')),
+               Field('age_min','integer',label=T('age_min')),
+               Field('age_max','integer',label=T('age_max')),
+               format = "%(gender_id)s %(name)s",
+               )
+db.define_table('sub_category',
+               Field('name', label = T('name'), requires = IS_UPPER()),
+               Field('category_id',db.category, label = T('category')),
+               Field('gender_id',db.gender,label=T('gender')),
+               Field('grade_min',db.,label=T('age_min')),
+               Field('grade_max','integer',label=T('age_max')),
+               format = "%(name)s",               
+               
+               )               
+def calculate_age(birth):
+    import datetime
+    diff = (datetime.date.today() - birth).days
+    years = int(diff/365)
+    return years               
+               
+
+def set_category( birth_date_ , gender_):
+    age = calculate_age(birth_date_)
+    category_id = db( (db.category.gender_id== gender_ ) & (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
+    return category_id               
+db.define_table('athlete',
+               Field('tournament_id',db.tournament, label = T('tournament')),
+               Field('photo','upload',requires=IS_NULL_OR(IS_IMAGE())),
+               Field('identity_number','string', label = T('identity_number'),requires=IS_NOT_EMPTY() ),
+               Field('gender_id', db.gender,label = T('gender')),
+               Field('name', label = T('name') ,requires = IS_UPPER()),
+               Field('grade_id',db.grade, label = T('grade') , requires = IS_IN_DB(db, 'grade.id', db.grade._format,orderby=db.grade.id)) ,
+               Field('birth_date','date', label = T('birth_date'), requires = IS_DATE(format = '%d/%m/%Y')),
+               Field('age', 'integer',label = T('age'), compute = lambda r: calculate_age(r['birth_date'])  ),
+               Field('dojo_id',db.dojo, label = T('dojo')),
+               Field('category_id',db.category, compute = lambda r: set_category(r['birth_date'],r['gender_id']), )
+               
+               )
+
+
+
+db.define_table('fight',
+               Field('tournament_id',db.tournament, label = T('tournament_id')),
+               Field('phase','integer', label = T('phase')),
+               Field('fight_num','integer',label = T('fight_num')),
+               Field('tatami_id',db.tatami, label = T('tatami')),
+               Field('athlete_blue_id','integer', label = T('athlete_blue'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
+               Field('athlete_red_id','integer', label = T('athlete_red'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
+               Field('athlete_win_id','integer', label = T('athlete_win'),requires=IS_NULL_OR(IS_IN_DB(db,db.athlete.id,'%(name)s'))), 
+               Field('red_score','integer', label = T('red_score')),
+               Field('blue_score','integer', label = T('blue_score')),
+               Field('start_date','datetime', label = T('start_date')),
+               Field('finished','boolean', label = T('finished')),              
+               Field('referee_id','integer', label = T('referee')),
+               Field('category_id',db.category, label = T('category')   ) ,
+               Field('gender_id',db.category, label = T('gender')   ) ,
+               Field('grade_id',db.category, label = T('grade')   ) ,
+
+               
+               
+               )
+
+db.define_table('fight_score_detail',
+               Field('fight_id',db.fight, label = T('fight')),
+               Field('athlete_id',db.athlete, label = T('athlete')),
+               Field('textevent','string', label = T('event')),
+               Field('val','integer', label = T('name')),
+               Field('cronometer_secs','integer', label = T('secs')),
+               Field('cronometer_mins','integer', label = T('mins')),                              
+               )
+
+db.define_table('fight_fault_detail',
+               Field('fight_id',db.fight, label = T('fight')),
+               Field('athlete_id',db.athlete, label = T('athlete')),
+               Field('event_id','text', label = T('event')),
+               Field('val','integer', label = T('name')),
+               Field('cronometer_secs','integer', label = T('secs')),
+               Field('cronometer_mins','integer', label = T('mins')),                              
+               )
+
+db.define_table('fight_json',
+               Field('fight_id',db.fight, label = T('fight')),
+               Field('data_log','text', label = T('json_data')),
+               
+               )
+
+
+def auto_create_membership(field_,id_):
+    db.auth_membership.insert(user_id=id_,group_id=field_['group_id'])
+    
+def auto_update_membership(set_,field_): # set object represent  (db.table.id==1)
+    user = set_.select(db.auth_user.id).first()
+    user_member = db(db.auth_membership.user_id==user.id).update(group_id=field_['group_id'])
+           
+db.auth_user._after_insert.append(lambda field,id: auto_create_membership(field,id))
+db.auth_user._before_update.append(lambda set_, field_: auto_update_membership(set_, field_))
+
+
+
+
+"""
+def auto_create_athlete_set_category(field_,id_):
+
+    age = calculate_age(field_['birth_date'])
+    category_id = db( (db.category.age_max>= age ) & (db.category.age_min<= age) ).select(db.category.id).first().as_dict()['id']
+    db(db.athlete.id==id_).update(category_id=category_id)
+    
+def auto_update_athlete_set_category( set_, field_): # set object represent  (db.table.id==1)
+    pass
+           
+db.athlete._after_insert.append(lambda field,id: auto_create_athlete_set_category(field,id))
+db.athlete._before_update.append(lambda set_, field_: auto_update_athlete_set_category(set_, field_))
+"""
+#db.auth_user.group
+
+T.force('es-es')
+
+def init_data():
+  if db(db.auth_group.id>0).isempty():
+    admin_id= db.auth_group.insert(role = 'admin', description= 'Administrator')
+    db.auth_group.insert(role = 'referee', description= 'Referee')
+    db.commit()
+  if db(db.auth_user.id>0).isempty():
+    user_id = db.auth_user.bulk_insert([{'first_name' : 'admin', 
+                              'group_id':admin_id,
+                               'last_name' : 'admin', 
+                               'email' : 'admin@karateapp.com', 
+                               'password' : db.auth_user.password.validate('1q2w3e.')[0]}])
+  if db(db.grade.id>0).isempty():
+    db.grade.insert(name="9° kyu")
+    db.grade.insert(name="9° kyu")
+    db.grade.insert(name="8° kyu")
+    db.grade.insert(name="7° kyu")
+    db.grade.insert(name="6° kyu")
+    db.grade.insert(name="5° kyu")
+    db.grade.insert(name="4° kyu")
+    db.grade.insert(name="3° kyu")
+    db.grade.insert(name="2° kyu")
+    db.grade.insert(name="1° kyu")
+    db.grade.insert(name="1° dan")    
+    db.grade.insert(name="2° dan")
+    db.grade.insert(name="3° dan")
+    db.grade.insert(name="4° dan")
+    db.grade.insert(name="5° dan")      
+  if db(db.category.id>0).isempty():     
+    db.category.insert(name='04 AÑOS',age_max=4,age_min=4,gender_id=1)
+    db.category.insert(name='05 AÑOS',age_max=5,age_min=5,gender_id=1 )
+    db.category.insert(name='06 a 07 AÑOS',age_max=07,age_min=06,gender_id=1 )
+    db.category.insert(name='08 a 09 AÑOS',age_max=9,age_min=8,gender_id=1)
+    db.category.insert(name='10 a 11 AÑOS',age_max=11,age_min=10,gender_id=1)
+    db.category.insert(name='12 a 13 AÑOS',age_max=13,age_min=12,gender_id=1)
+    db.category.insert(name='14 a 15 AÑOS',age_max=15,age_min=14,gender_id=1)
+    db.category.insert(name='16 a 17 AÑOS',age_max=17,age_min=16,gender_id=1)
+    db.category.insert(name='18 a 34 AÑOS',age_max=34,age_min=18,gender_id=1)
+    db.category.insert(name='35 a 40 AÑOS',age_max=40,age_min=35,gender_id=1)
+    db.category.insert(name='41 a 50 AÑOS',age_max=50,age_min=41,gender_id=1)
+    db.category.insert(name='mas 50 AÑOS',age_max=99,age_min=51,gender_id=1)
+
+    db.category.insert(name='04 a 05 AÑOS',age_max=5,age_min=4,gender_id=2)
+    db.category.insert(name='06 a 07 AÑOS',age_max=07,age_min=06,gender_id=2 )
+    db.category.insert(name='08 a 09 AÑOS',age_max=9,age_min=8,gender_id=2)
+    db.category.insert(name='10 a 11 AÑOS',age_max=11,age_min=10,gender_id=2)
+    db.category.insert(name='12 a 13 AÑOS',age_max=13,age_min=12,gender_id=2)
+    db.category.insert(name='14 a 15 AÑOS',age_max=15,age_min=14,gender_id=2)
+    db.category.insert(name='16 a 17 AÑOS',age_max=17,age_min=16,gender_id=2)
+    db.category.insert(name='18 a 29 AÑOS',age_max=29,age_min=18,gender_id=2)
+    db.category.insert(name='30 a 40 AÑOS',age_max=40,age_min=30,gender_id=2)
+    db.category.insert(name='mas 40 AÑOS',age_max=99,age_min=40,gender_id=2)
+
+init_data()

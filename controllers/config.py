@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 # try something like
+@auth.requires_login()
 def index(): 
     grid = SQLFORM.grid(db.tournament)
+    return dict(grid = grid, deletable=False)
+@auth.requires_login()
+def category(): 
+    grid = SQLFORM.smartgrid(db.category, deletable=False)
     return dict(grid = grid)
 
-def category(): 
-    grid = SQLFORM.smartgrid(db.category)
-    return dict(grid = grid)
+@auth.requires_login()    
 def subcategory(): 
     fields = (
         
@@ -19,27 +22,27 @@ db.subcategory.weight_min,  db.subcategory.weight_max
 
         )
     qry = ( (db.subcategory.id>0) & (db.subcategory.category_id==db.category.id) & (db.category.gender_id == db.gender.id)  )
-    grid = SQLFORM.grid(qry, fields = fields)
+    grid = SQLFORM.grid(qry, fields = fields, deletable=False)
     return dict(grid = grid)
-
+@auth.requires_login()
 def school(): 
-    grid = SQLFORM.grid(db.school)
+    grid = SQLFORM.smartgrid(db.school, deletable=False)
     return dict(grid = grid)
-    
+@auth.requires_login()    
 def dojo(): 
-    grid = SQLFORM.grid(db.dojo)
+    grid = SQLFORM.grid(db.dojo, deletable=False)
     return dict(grid = grid)
-
+@auth.requires_login()
 def state(): 
-    grid = SQLFORM.grid(db.states)
+    grid = SQLFORM.grid(db.states, deletable=False)
     return dict(grid = grid)
 
-
+@auth.requires_login()
 def tatami(): 
-    grid = SQLFORM.grid(db.tatami)
+    grid = SQLFORM.grid(db.tatami, deletable=False)
     return dict(grid = grid)
 
-
+@auth.requires_login()
 def users():
     db.auth_group.format='%(role)s'
     db.auth_user.group_id.requires = IS_IN_DB(db,db.auth_group.id,'%(role)s')

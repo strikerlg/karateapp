@@ -50,15 +50,20 @@ response.menu = [
 
         (T('Users'), False, URL('config', 'users'), []), 
         (T('Athletes'), False, URL('athlete', 'index'), []), 
-        (T('Generate Matchs'), False, URL('fight', 'generate_matchs'), []), 
+        
     ]),
 
     (T('Stats'), False, URL('monitor', 'index'), [
+        (T('Registro'), False, URL('fight', 'generate_matchs'), []), 
         (T('By Dojo'), False, URL('monitor', 'index'), []),
         (T('By Dojo '), False, URL('fight', 'bracket'), []),
         (T('By Tatami'), False, URL('fight', 'tatami'), []),
 
     ]),
+
+    (T('Registro'), False, URL('config', 'school'), [
+       
+    ]),    
     (T('Reports'), False, URL('fight', 'index'), [
         (T('Athletes'), False, URL('report', 'athlete'), []),
         (T('Matchs'), False, URL('report', 'index'), []),

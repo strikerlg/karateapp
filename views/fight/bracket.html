@@ -40,51 +40,72 @@
 </div>
 
 <style>
-div.jQBracket .team {
-    background-color: #000;
-    width: 120px;
-   
+.container-brackets .round .match .player {
+    font-size: 9px;
 }
-div.jQBracket .score {
-    color: #fff;
-   
-}
+
 </style>
 
-<div id="minimal" class="demo"> </div>
+<div class="brackets">
+</div>
 <script>
-    var minimalData = {
-    teams : {{ data = [ [rs['blue'],rs['red']] for rs in fights  ] }} {{response.write(json.dumps(data),escape=False)}},
-    results : [
-    {{ for phase in xrange(max_phase): }}
-    {{ data = [ [ rs['blue'],rs['red'] ] for rs in results if  rs['phase']==phase+1  ] }} {{response.write(json.dumps(data),escape=False) if len(data)>0 else ''}},
+var rounds;
+  {{pp=False}}
+  rounds = [
+  {{for phase in xrange(max_phase):}}
+    {{phase=phase+1}}
 
-    {{pass }}
-    //       [[1,2], [3,4]],       /* first round */   /* first round */
-   /* second round */
-    ]
-  }
- 
+    [ 
+      {{for r in results:}}
+      
+        {{if r['phase'] ==phase:}}
+        {
+          player1: { name: "{{=r['blue'] or ''}} {{=r['blue_name']}}", winner: {{a ='true' if r['blue_id']==r['athlete_win_id'] else 'false' }} {{=a}}, ID: {{=r['blue_id']}}  },
+          player2: { name: "{{=r['red'] or ''}} {{=r['red_name']}}", winner: {{b ='true' if r['red_id']==r['athlete_win_id'] else 'false' }} {{=b}}, ID: {{=r['red_id']}} }
+        },
 
-var resizeParameters = {
-  teamWidth: '100',
-  scoreWidth: 100,
-  matchMargin: 10,
-  roundMargin: 50,
-  init: minimalData
-};
- 
+        {{pass}}
+      {{pass}}
+    ],
 
-  $('#minimal').bracket(resizeParameters);
-
-</script>
-
-<script>$( document ).ready(function() {
     
-    //body= $('body');
-    //body.css('background','black');
-    
-    });
+  {{pass}}
+
+
+  {{for phase in xrange(max_phase):}}
+    {{phase=phase+1}}
+
+    {{for r in results:}} 
+    {{if r['phase'] ==max_phase and not pp:}}
+
+    {{pp=True}}
+      [
+          {
+            player1: { name: "{{=r['win_name'] or ''}}", winner: true, ID: {{=r['athlete_win_id'] or 0}}  },
+          }
+
+      ],
+
+    {{pass}}
+    {{pass}}
+ {{pass}}  
+  ];
+ var titles = ['round 2', 'round 3', 'round 4'];
+ $(".brackets").brackets({
+  titles: false,
+  rounds: rounds,
+            color_title: 'black',
+            border_color: '#46CFB0',
+            color_player: 'white',
+            bg_player: '#000000',
+            color_player_hover: 'white',
+            bg_player_hover: '#E95546',
+            border_radius_player: '5px',
+            border_radius_lines: '5px',
+});
+
+$('.player ').css('color','#fff');
+
 </script>
 <script>
 $( ".auto_post" ).change(function() {
@@ -96,8 +117,7 @@ $( "#btn_goto" ).click(function() {
        $("#frm1").submit();
 });
 
-
-
+$(".jQBracket").css('width','800px');
  
 
 </script>

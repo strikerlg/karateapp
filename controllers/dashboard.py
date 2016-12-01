@@ -14,9 +14,9 @@ def index():
 
 
     tatami = db(db.tatami.id==matchs.fight.tatami_id).select(db.tatami.ALL).first().as_dict()['name'] if db(db.tatami.id==matchs.fight.tatami_id).select(db.tatami.ALL).first() else 0
-    category = db(db.category.id==matchs.fight.category_id).select(db.category.ALL).first().as_dict()['name']  if db(db.category.id==matchs.fight.category_id).select(db.category.ALL).first()  else 0
+    category = db(db.category.id==matchs.fight.category_id).select(db.category.ALL).first()
     #return str(matchs)
-    return dict(record=matchs,tatami_name=tatami, category_name = category)
+    return dict(record=matchs,tatami_name=tatami, category = category)
     
 def refresh():
     fight_id = request.vars.fight_id or 0
@@ -31,7 +31,7 @@ def save_fight_log():
     fight = json.loads(data)
     #db.fight_json.insert(fight_id=fight['fight_id'], data_log = data)
     return str(fight['fight_id'])
-
+@auth.requires_login()
 def save_fight():
     import json
     data = request.vars.data or '{s:1}'
@@ -54,7 +54,7 @@ def save_fight():
     rs1 = qry.select(db.fight.ALL).first()
     import math
     fight_num = math.ceil(rs1.fight_num/2.0)
-    is_blue = True if rs1.fight_num % 2 ==0 else False
+    is_blue = False if rs1.fight_num % 2 ==0 else True
 
     qry2 = db( (db.fight.subcategory_id==rs1.subcategory_id ) & (db.fight.phase==rs1.phase+1) & (db.fight.fight_num== fight_num) ) 
     if is_blue:

@@ -14,6 +14,7 @@ body {
     background-color:#000;
     padding-top:0px;
     padding-bottom;0px;
+    line-height: 1;
     }
 
 #lbl_winner {
@@ -66,6 +67,20 @@ padding-top:0px;
 #athlete_blue {
 font-size:46px;
 color:blue;
+text-align:center;
+
+
+        
+}
+#athlete_ao {
+font-size:20px;
+color:blue;
+text-align:center;
+      
+}
+#athlete_aka{
+font-size:20px;
+color:red;
 text-align:center;
 
 
@@ -143,12 +158,12 @@ th,td {
 
 
 <div class="row">
-  <div class="col-md-4" style="text-align:center"><div id="athlete_blue" >...</div></div>
+  <div class="col-md-4" style="text-align:center"><div id="athlete_blue" >...</div><div id="athlete_ao" >(AO)</div></div>
   <div class="col-md-4" style="text-align:center">  
       <div id="cronometer" > <span id="minutos">60</span> : <span id="segundos">00</span> </div> 
       <div id="protection" >10</div> 
   </div> 
-  <div class="col-md-4" style="text-align:center"><div id="athlete_red" >..</div></div>
+  <div class="col-md-4" style="text-align:center"><div id="athlete_red" >..</div><div id="athlete_aka" >(AKA)</div></div>
 </div>
 
 
@@ -173,7 +188,7 @@ th,td {
           
           <td><div id="btn_cat1_blue_1" class="fault_blue"></div></td>
           <td><div id="btn_cat2_blue_1" class="fault_blue"></div></td>
-          <td>C</td>
+          <td style="color:white;">C</td>
           <td><div id="btn_cat1_red_1" class="fault_red"></div> </td>
           <td><div id="btn_cat2_red_1" class="fault_red"></div></td>
       </tr>
@@ -182,7 +197,7 @@ th,td {
           
           <td><div id="btn_cat1_blue_2" class="fault_blue"> </div> </td>
           <td><div id="btn_cat2_blue_2" class="fault_blue"> </div></td>
-          <td>K</td>
+          <td style="color:white;">K</td>
           <td><div id="btn_cat1_red_2" class="fault_red"> </div> </td>
           <td><div id="btn_cat2_red_2" class="fault_red"> </div></td>
       </tr>
@@ -191,7 +206,7 @@ th,td {
           
           <td><div id="btn_cat1_blue_3" class="fault_blue"> </div> </td>
           <td><div id="btn_cat2_blue_3" class="fault_blue"> </div></td>
-          <td>HC</td>
+          <td style="color:white;">HC</td>
           <td><div id="btn_cat1_red_3" class="fault_red"> </div> </td>
           <td><div id="btn_cat2_red_3" class="fault_red"> </div></td>
       </tr>
@@ -199,7 +214,7 @@ th,td {
           
           <td><div id="btn_cat1_blue_4" class="fault_blue"> </div> </td>
           <td><div id="btn_cat2_blue_4" class="fault_blue"> </div></td>
-          <td>H</td>
+          <td style="color:white;">H</td>
           <td><div id="btn_cat1_red_4" class="fault_red"> </div> </td>
           <td><div id="btn_cat2_red_4" class="fault_red"> </div></td>
       </tr>            
@@ -270,7 +285,7 @@ th,td {
 <div class="row">
   <div class="col-md-4" style="text-align:center"><div id="label_tatami" >{{=tatami_name}}</div></div>
   <div class="col-md-4" style="text-align:center">    <div id="label_tournament" >OPEN  DE VENEZUELA</div> </div>
-  <div class="col-md-4" style="text-align:center"><div id="label_category" >{{=category_name}}</div></div>
+  <div class="col-md-4" style="text-align:center"><div id="label_category" >{{=category.name or ''}}</div></div>
 </div>
 
 
@@ -290,40 +305,30 @@ th,td {
         <div class="row">
        
        
-
-
-
-
-
-    <table class="table">
-    <tr>
-        <td>
-             <div id="btn_set_winner_blue" class="fault_blue_active">  </div
-             <div> {{= IMG( _width="50px",_heigth="50px",_src= URL('default', 'download', args=[record.athlete_blue.photo]),_alt="de", _id="img_blue_photo" ) }}</div>
-        </td>
-        <td>
-        {{= IMG( _width="200px",_heigth="200px",_src= URL('static', 'images/logo.jpg'),_alt="de" , _id="img_win_photo") }}   
-        <div id="lbl_winner">GANADOR: </div>
-            
-        </td>
-        <td>
-               <div id="btn_set_winner_red" class="fault_red_active">  </div>
-               <div>{{= IMG( _width="50px",_heigth="50px",_src= URL('default', 'download', args=[record.athlete_red.photo]),_alt="de", _id="img_red_photo" ) }}</div>
-        </td>
-    </tr>
-    </table>
+          <table class="table">
+          <tr>
+              <td width="20%">
+                   <div id="btn_set_winner_blue" class="fault_blue_active">  </div>
+                   <div style="color:blue">{{=record.athlete_blue.name}}</div>
+              </td>
+              <td width="60%">
+              {{= IMG( _width="200px",_heigth="200px",_src= URL('static', 'images/logo.jpg'),_alt="de" , _id="img_win_photo") }}   
+              <div id="lbl_winner">GANADOR: </div>
+                  
+              </td>
+              <td width="20%">
+                     <div id="btn_set_winner_red" class="fault_red_active">  </div>
+                     <div style="color:red">{{=record.athlete_red.name}}</div>
+              </td>
+          </tr>
+          </table>
       
-
-
-
-
-
 
 
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Reiniciar</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
         <button type="button" id="btn_save" class="btn btn-primary">Guardar</button>
       </div>     
       
@@ -365,7 +370,7 @@ var fight = {
     red_c2:0,   
     winner_athlete_id:0,             
     cronometer_secs:00,
-    cronometer_mins:3,
+    cronometer_mins:{{=category.minutes}},
     cronometer_active:false,
     protection_active:false,
     protection_color: '',  
@@ -381,17 +386,16 @@ var fight = {
     set_winner: function (color){
         if (color=='blue'){
             this.winner_athlete_id = this.blue_athlete_id;
-            this.finished = 1;
-            $('#lbl_winner').html('GANADOR: ' + this.blue_athlete_name);
-            var img ='{{=  URL("default", "download", args=[record.athlete_blue.photo]) }}'
-            $('#img_win_photo').attr("src", img) ;
+            
+            $('#lbl_winner').html('GANADOR: AO ' + this.blue_athlete_name);
+            //var img ='{{=  URL("default", "download", args=[record.athlete_blue.photo]) }}'
+            //$('#img_win_photo').attr("src", img) ;
         }
         if (color=='red'){
             this.winner_athlete_id = this.red_athlete_id;
-            this.finished = 1;
-            $('#lbl_winner').html('GANADOR: ' + this.red_athlete_name);
-            var img = '{{=URL("default", "download", args=[record.athlete_red.photo])}}';
-            $('#img_win_photo').attr("src", img) ;
+            $('#lbl_winner').html('GANADOR: AKA ' + this.red_athlete_name);
+            //var img = '{{=URL("default", "download", args=[record.athlete_red.photo])}}';
+            //$('#img_win_photo').attr("src", img) ;
         }
         
         
@@ -419,10 +423,14 @@ var fight = {
         } 
 
         if (this.red_score-this.blue_score>=8){
+            this.cronometer_active = false;
+
             $('#anuncio').modal('toggle');
             this.set_winner('red');
         }
         if (this.blue_score-this.red_score>=8){
+            this.cronometer_active = false;
+
             $('#anuncio').modal('toggle');
             this.set_winner('blue');
         }
@@ -441,7 +449,7 @@ var fight = {
     
     
     cronometer: function(){
-        if (fight.cronometer_active==true && this.finished==0) {
+        if (this.cronometer_active==true && this.finished==0) {
             if ( this.cronometer_secs>=0 && this.cronometer_mins>=0 ) {    
                 fmt = '';
                 fmt_min='';
@@ -465,6 +473,8 @@ var fight = {
                                   else
                                          tmp_color='red';
                         $('#anuncio').modal('toggle');
+                        this.cronometer_active = false;
+
                         this.set_winner(tmp_color);
                      
                        
@@ -502,6 +512,8 @@ var fight = {
 
                 if(this.protection_secs == 0){
                      $('#anuncio').modal('toggle');
+                     this.cronometer_active = false;
+
                      color_winner = '';
                      if (this.protection_color=='blue')
                         color_winner='red';
@@ -520,8 +532,23 @@ var fight = {
     },
  
     save: function(){
-        
-            $.post( "save_fight", {data:JSON.stringify(fight)} );   
+        if (confirm("Desea Almacenar el Resultado de Forma Definitiva?")){
+            this.finished=1;
+            $.post( "save_fight", {data:JSON.stringify(fight)} )
+              .done(function() {
+                alert( "Registro Exitoso" );
+                window.location.href='{{=URL('default','index')}}';
+              })
+              .fail(function() {
+                alert( "No se pudo Guardar la Pelea Intente Nuevamente" );
+                this.finished=0;
+              })
+
+
+
+
+            ;   
+        }
         
     },
 
@@ -611,6 +638,8 @@ var fight = {
                     tmp='red';
                 else
                     tmp='blue';
+                this.cronometer_active = false;
+
                 $('#anuncio').modal('toggle');
                 this.set_winner(tmp);
             }
@@ -774,6 +803,8 @@ $( "#btn_set_winner_blue" ).click(function() {
 });
 
 $( "#img_logo" ).click(function() {
+    fight.cronometer_active = false;
+
     $('#anuncio').modal('toggle');
 });
 
@@ -810,7 +841,7 @@ $('#protection').hide();
 <script type="text/javascript">
 //<![CDATA[
 // 1000 = 1 segundo
-var mins = 3;
+var mins = {{=category.minutes or 3}};
 var segs =59;
 var s;
 document.getElementById("minutos").innerHTML='0'+mins;

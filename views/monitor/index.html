@@ -34,9 +34,9 @@ th,td {
 <tr>
     
     <td>
-        <th rowspan="2">#</th>
-        <th rowspan="2">DOJO</th>
-        <th rowspan="2">VICTORIAS</th>
+        <th rowspan="2"></th>
+        <th rowspan="2"></th>
+        <th rowspan="2"></th>
         <th colspan="3">MEDALLAS</th>
     </td>
     
@@ -46,9 +46,9 @@ th,td {
 <tr>
     
     <td>
-        <th></th>
-        <th></th>
-        <th></th>
+        <th>#</th>
+        <th>DOJO</th>
+        <th>VICTORIAS</th>
         <th>ORO</th>
         <th>PLATA</th>
         <th>BRONCE</th>
@@ -57,32 +57,22 @@ th,td {
     
 </tr>
 <tbody>
+{{for i,r in enumerate(rs):}}
 <tr>
     
     <td>
-        <td>1</td>
-        <td>ESCUELA 1</td>
+        <td>{{=i+1}}</td>
+        <td>{{=r['escuela']}}</td>
 
-        <td>50 (50%)</td>
-        <td>25</td>
-        <td>12</td>
-        <td>13</td>
+        <td>{{=r['victorias']}}</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
     </td>
     
 </tr>
+{{pass}}
 
-<tr>
-    
-    <td>
-        <td>2</td>
-        <td>ESCUELA 2</td>
-        <td>50 (50%)</td>
-        <td>25</td>
-        <td>12</td>
-        <td>13</td>        
-    </td>
-    
-</tr>
 </tbody>
 </table>
 

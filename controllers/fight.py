@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # try something like
 
-
+@auth.requires_login()
 def index():
     cat_min = db.category.id.min()
     subcat_min = db.subcategory.id.min()
@@ -75,7 +75,7 @@ def index():
         ,genders= genders , gender_default=gender_default, subcategories = subcategories, subcat_default = subcat_default)
 
 
-
+@auth.requires_login()
 def tatami():
     #cat_min = db.category.id.min()
     #cat_id= request.vars.category_id or db(db.category.gender_id==gender_default).select(cat_min).first()[cat_min]
@@ -142,11 +142,10 @@ def tatami():
     grid = SQLFORM.grid(qry,showbuttontext=False, fields = fields , deletable=False, create=False)
     return dict(grid=grid,tatamis=tatamis, tatami_default = tatami_default)
 
-
+@auth.requires_login()
 def bracket():
     import json
-    response.files.append(URL('static','js/jquery.bracket.min.js') )
-    response.files.append(URL('static','css/jquery.bracket.min.css') )
+    response.files.append(URL('static','js/brackets.min.js') )
 
     cat_min = db.category.id.min()
     subcat_min = db.subcategory.id.min()
@@ -166,7 +165,7 @@ def bracket():
 
 
     fights = db.executesql ("""
-     select coalesce(b2.name,'sinf') as red, coalesce(b1.name,'sinf') as blue 
+     select coalesce(b2.name,'.') as red, coalesce(b1.name,'.') as blue 
      from fight a 
      left join athlete b1 on a.athlete_blue_id = b1.id 
      left join athlete b2 on a.athlete_red_id = b2.id
@@ -177,24 +176,28 @@ def bracket():
 
 
     results = db.executesql ("""
-    select
+   select
      a.id,
-     phase,athlete_red_id,athlete_blue_id,finished,
-     coalesce(case when red_score>0 then red_score else null end, 
-     case when athlete_red_id=athlete_win_id then 1 else 0 end) as red, 
+     phase,
+     fight_num,coalesce(athlete_red_id,0) as red_id,coalesce(b1.name,'') as blue_name, 
+     coalesce(athlete_blue_id,0) as blue_id,coalesce(b2.name,'') as red_name,
+     finished,
+     coalesce(athlete_win_id) as athlete_win_id,
+     coalesce(w1.name,'') as win_name,
+     coalesce(red_score) as red, 
 
-     coalesce(case when blue_score>0 then blue_score else null end,
-     case when athlete_blue_id=athlete_win_id then 1 else 0 end) as blue 
+     coalesce(blue_score) as blue 
      from fight a 
      left join athlete b1 on a.athlete_blue_id = b1.id 
      left join athlete b2 on a.athlete_red_id = b2.id
-     where a.subcategory_id=%s order by a.id limit 32
+     left join athlete w1 on a.athlete_win_id = w1.id
+     where a.subcategory_id=%s order by 1,2
     """%str(subcat_default)
     ,as_dict=True)
 
     #return str(fights)
     return dict(fights=fights,genders= genders , gender_default=gender_default, categories = categories, cat_id=cat_id, results=results,max_phase = max_phase,subcategories = subcategories, subcat_default = subcat_default)
-
+@auth.requires_login()
 def generate():
     import math
     import random
@@ -204,7 +207,7 @@ def generate():
     for gender in genders:
         #categories_count = db( (db.category.id>0) ).count()
         subcategories = db((db.subcategory.id>0) 
-		                & (db.subcategory.id==subcat_default)
+                        & (db.subcategory.id==subcat_default)
                         & (db.subcategory.category_id==db.category.id) 
                         & (db.category.gender_id == gender.id)).select(db.category.ALL, db.subcategory.ALL)
         #gender =  db(db.gender.id>0).select(db.gender.ALL)
@@ -222,6 +225,26 @@ def generate():
                     athlete_by_dojo[ athlete.dojo_id ].append(athlete.id)
             matchs_count = math.ceil(athletes_count/2.0)
             
+            val_ = 0 # Calculo de las rondas
+            for v in perfect_match:
+                val_ = matchs_count / v
+                if val_ == 1:
+
+                 val_ =v
+                 break
+                elif val_ <1:
+
+                 val_ = v
+                 break   
+            print val_
+            diff_ = val_*2 - athletes_count
+            for i in xrange(diff_):
+                if not athlete_by_dojo.has_key(-1):
+                    athlete_by_dojo[ -1 ] = [-1*(i+1)]
+                else:
+                    athlete_by_dojo[ -1 ].append(-1*(i+1))              
+
+            print athlete_by_dojo
             athletes= []
 
             for did in athlete_by_dojo.keys():
@@ -258,17 +281,7 @@ def generate():
                     athletes.remove(val)
                 return val
                 
-            val_ = 0
-            for v in perfect_match:
-                val_ = matchs_count / v
-                if val_ == 1:
-
-                 val_ =v
-                 break
-                elif val_ <1:
-
-                 val_ = v
-                 break         
+      
 
 
             if is_fight_empty(rscat.subcategory.id):
@@ -319,33 +332,33 @@ def is_fight_empty(subcategory_id_):
     val = False
     val = db( (db.fight.subcategory_id == subcategory_id_ )  ).isempty() 
     return val
-
+@auth.requires_login()
 def generate_matchs():
-	
-	sql = """
-	select e.name as circuito,d.name as genero,c.name as categoria, b.name as subcategoria,b.id as subcat_id,
+    
+    sql = """
+    select e.name as circuito,d.name as genero,c.name as categoria, b.name as subcategoria,b.id as subcat_id,
   c.id as category_id,d.id as gender_id,
   count(*) as inscritos from athlete a
-	left join subcategory b on (a.subcategory_id=b.id)
-	left join category c on (a.category_id=c.id)
-	left join gender d on (c.gender_id=d.id)
+    left join subcategory b on (a.subcategory_id=b.id)
+    left join category c on (a.category_id=c.id)
+    left join gender d on (c.gender_id=d.id)
   left join circuit e on (a.circuit_id=e.id)
-	group by 1,2 ,3,4,5,6,7
-	order by 1,2 ,3	,4	,5,6,7
-	"""
-	datos=[]
-	registro=[ TR(TH('CIRCUITO'),TH('GENERO'),TH('CATEGORIA'),TH('SUBCATEGORIA'),TH('INSCRITOS'),TH('ACCION') ) ]
+    group by 1,2 ,3,4,5,6,7
+    order by 1,2 ,3 ,4  ,5,6,7
+    """
+    datos=[]
+    registro=[ TR(TH('CIRCUITO'),TH('GENERO'),TH('CATEGORIA'),TH('SUBCATEGORIA'),TH('INSCRITOS'),TH('ACCION'),TH('TATAMI') ) ]
 
-	rs = db.executesql(sql,as_dict=True)
-	fila2=0
-	for r in rs:
-		
-	  
-		registro.append( TR (TD(r['circuito']),TD(r['genero']), TD(r['categoria']),TD(r['subcategoria']),TD(r['inscritos']), TD( 
-		A('Generar Llave',_class="btn btn-primary btn-xs",_href=URL('fight','generate',vars=dict(subid=r['subcat_id']))) if is_fight_empty(r['subcat_id']) \
-    else A('Ver Llave',_class="btn btn-info btn-xs",_href=URL('fight','bracket',vars=dict(subcat_default=r['subcat_id'] , category_id= r['category_id'],gender_default=r['gender_id'])))
-		)	))
-	datos.append(registro)
-	return  dict(grid = TABLE(registro,_class="table"))
-	
-	
+    rs = db.executesql(sql,as_dict=True)
+    fila2=0
+
+
+    for r in rs:
+        
+        btn1 = A('Generar Llave',_class="btn btn-primary btn-xs",_href=URL('fight','generate',vars=dict(subid=r['subcat_id'])))
+        btn2 = A('Ver Llave',_class="btn btn-info btn-xs",_href=URL('fight','bracket',vars=dict(subcat_default=r['subcat_id'] , category_id= r['category_id'],gender_default=r['gender_id'])) )
+        registro.append( TR (TD(r['circuito']),TD(r['genero']), TD(r['categoria']),TD(r['subcategoria']),TD(r['inscritos']), TD(    btn1 if is_fight_empty(r['subcat_id']) else btn2)   ) )
+    datos.append(registro)
+    return  dict(grid = TABLE(registro,_class="table"))
+    
+    

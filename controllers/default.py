@@ -13,24 +13,36 @@ def index():
 
     #cat_min = db.category.id.min()
     #cat_id= request.vars.category_id or db(db.category.gender_id==gender_default).select(cat_min).first()[cat_min]
-    tatami_default = request.vars.tatami_default or '0'
+    tatami_default=0
+    try:
+       tatami_default = int(request.vars.tatami_default)
+    except:
+       pass
     
-
+    #return tatami_default
     tatamis = db(  db.tatami.id>0  ).select(db.tatami.ALL)
 
 
     cat_min = db.category.id.min()
     subcat_min = db.subcategory.id.min()
-    gender_default = request.vars.gender_default or 0
     
-    cat_id= request.vars.category_id or db(db.category.gender_id==gender_default).select(cat_min).first()[cat_min]
     
-    subcat_default = request.vars.subcat_default or db(db.subcategory.category_id==cat_id).select(subcat_min).first()[subcat_min]
+    gender_default = 0 if request.vars.gender_default is None else  int(request.vars.gender_default)
+    
+        
+    cat_id= 0 if request.vars.category_id is None else request.vars.category_id
+    cat_id=   cat_id  if cat_id!=0 else  db(db.category.gender_id==gender_default).select(cat_min).first()[cat_min]
+    cat_id = 0 if cat_id is None else int(cat_id)
+    
+    subcat_default = 0 if request.vars.subcat_default is None else request.vars.subcat_default
+    subcat_default = subcat_default if subcat_default!=0 else db(db.subcategory.category_id==cat_id).select(subcat_min).first()[subcat_min]
+    subcat_default = 0 if subcat_default is None else int(subcat_default)
+    
     nu_phase_default = request.vars.nu_phase or 1
     genders = db(  db.gender.id>0  ).select(db.gender.ALL)
     categories = db(  (db.category.id>0) & (db.category.gender_id == gender_default)  ).select(db.category.ALL)
     subcategories = db( (db.subcategory.id>0) & (db.subcategory.category_id==cat_id) ).select(db.subcategory.ALL)
-
+    #return TABLE(cat_id,subcat_default)
 
 
     def get_photo_blue(i,r):
@@ -69,32 +81,25 @@ def index():
     db.fight.athlete_win_id.represent = lambda i,r: db( db.athlete.id == r.athlete_win_id).select(db.athlete.name).first().as_dict()['name'] if db( db.athlete.id == r.athlete_win_id).select(db.athlete.name).first() else '..'
  
     qrys = []
-    if  tatami_default!='0':
+    if  tatami_default>0:
       qrys=[ db.fight.tatami_id==tatami_default ]
     else:
       qrys=[ db.fight.tatami_id==None ]
 
 
-    if  gender_default!='0':
+    if  gender_default>0:
       qrys.append(db.fight.gender_id==gender_default )
 
-    if  cat_id!='0':
+    if  cat_id>0:
       qrys.append(db.fight.category_id==cat_id )      
-    if  subcat_default!='0':
+      
+    if  cat_id>0 and subcat_default>0:
       qrys.append(db.fight.subcategory_id==subcat_default ) 
        
     qrys.append( db.fight.finished == None )
     qrys.append(  (db.fight.athlete_red_id != None) |  (db.fight.athlete_blue_id != None) )
     qrys.append( db.fight.athlete_win_id == None )
 
-    """qry=( (db.fight.tatami_id==tatami_default) & (db.fight.finished == None)  
-        & ( (db.fight.athlete_red_id != None) |  (db.fight.athlete_blue_id != None) )
-        & (db.fight.athlete_win_id == None)  )
-    if tatami_default == '0':
-       qry=( (db.fight.tatami_id==None) & (db.fight.finished == None)  
-        & ( (db.fight.athlete_red_id != None) |  (db.fight.athlete_blue_id != None) )
-        & (db.fight.athlete_win_id == None)  )
-    """
     qry = reduce(lambda a, b:(a & b), qrys)
 
     fields = (db.fight.phase,
@@ -110,12 +115,15 @@ def index():
               db.fight.red_score
               )
     #<a type="button" target="_blank"  href="{{=URL('dashboard','index',vars=dict(match_id=record.fight.id)) }}" class="btn btn-primary btn-xs">Tablero de Control</a>
-    links = [lambda row: A('Tablero',_href=URL('dashboard','index',vars=dict(match_id=row.id)), _class="btn btn-primary btn-xs" )] 
-    grid = SQLFORM.grid(qry,showbuttontext=False, fields = fields , links=links, deletable=False, create=False)
+    links = [ lambda row: A('Tablero',_href=URL('dashboard','index',vars=dict(match_id=row.id)), _class="btn btn-primary btn-xs" )] 
+    links += [ lambda row: A('Llave',_href=URL('fight','bracket',vars=dict(gender_default=row.gender_id, category_id=row.category_id,subcat_default=row.subcategory_id)), _class="btn btn-primary btn-xs" )] 
+    grid = SQLFORM.grid(qry,showbuttontext=False, fields = fields , links=links, deletable=False, create=False, editable=False, orderby=(db.fight.phase|db.fight.subcategory_id))
     
     tatamis = db.executesql("""select count(b.id) as peleas, coalesce(a.name,'SINF.') as tatami ,coalesce(a.id,0) as id from tatami a
                                         FULL outer join fight b on a.id= b.tatami_id
                                         where finished is null 
+                                        --and (athlete_red_id is not null or athlete_blue_id is not null) 
+                                        --and athlete_win_id is null
 
                                         group by 2,3 order by 3 """,as_dict=True)
 

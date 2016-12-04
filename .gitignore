@@ -1,8 +1,0 @@
-.pyc
-/errors/*
-/cache/*
-/databases/*
-/sessions/*
-/cron/*
-/uploads/*
-*.bak
